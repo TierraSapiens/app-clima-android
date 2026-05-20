@@ -32,9 +32,17 @@ class ClimaService {
       return {'icono': Icons.cloud_queue_rounded, 'color': Colors.white70, 'texto': 'Nublado'};
     }
   }
-Future<Map<String, dynamic>?> obtenerDatosClima(double lat, double lon) async {
+
+  IconData obtenerIconoPorCodigo(String codigoIconoApi) {
+    if (codigoIconoApi.endsWith('n')) {
+      return Icons.nightlight_round;
+    }
+    return Icons.wb_sunny;
+  }
+
+  Future<ClimaRespuesta?> obtenerDatosClima(double lat, double lon) async {
     const String apiKey = "d1f3d163ba58ae2e5fe2e027b312e550";
-    
+
     final urlActual = Uri.parse(
       'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=metric&lang=es'
     );
@@ -52,10 +60,21 @@ Future<Map<String, dynamic>?> obtenerDatosClima(double lat, double lon) async {
         final datosMeteo = jsonDecode(resForecast.body);
         final datosDiarios = datosMeteo['daily'];
 
+        final int temperaturaActual = datosActual['main']['temp'].round();
+        final int sensacionTermicaActual = datosActual['main']['feels_like'].round();
+        final String descripcionActual = datosActual['weather'][0]['description'];
+        final String estadoActual = descripcionActual.substring(0, 1).toUpperCase() + descripcionActual.substring(1);
+        final String codigoIconoActual = datosActual['weather'][0]['icon'];
+        final String climaPrincipal = datosActual['weather'][0]['main'];
+
+        final IconData iconoActual = obtenerIconoPorCodigo(codigoIconoActual);
+        final Color colorIconoActual = codigoIconoActual.endsWith('d')
+            ? Colors.amber
+            : Colors.blueGrey.shade100;
+
         List<ClimaDia> diasAfinados = [];
         int nivelMaximoAlerta = 0;
 
-        //pronóstico de 3 días
         for (int i = 1; i <= 3; i++) {
           String fechaRaw = datosDiarios['time'][i];
           DateTime fechaParseada = DateTime.parse(fechaRaw);
@@ -66,9 +85,9 @@ Future<Map<String, dynamic>?> obtenerDatosClima(double lat, double lon) async {
 
           String max = "${datosDiarios['temperature_2m_max'][i].round()}°";
           String min = "${datosDiarios['temperature_2m_min'][i].round()}°";
-          
+
           int codigoWMO = datosDiarios['weather_code'][i];
-          
+
           if (codigoWMO == 96 || codigoWMO == 99 || codigoWMO == 65 || codigoWMO == 82) {
             if (nivelMaximoAlerta < 2) nivelMaximoAlerta = 2;
           } else if (codigoWMO == 95 || codigoWMO == 63 || codigoWMO == 81) {
@@ -88,16 +107,21 @@ Future<Map<String, dynamic>?> obtenerDatosClima(double lat, double lon) async {
           );
         }
 
-        //devuelve a la pantalla un paquete con todo organizado
-        return {
-          'datosActuales': datosActual,
-          'listaPronostico': diasAfinados,
-          'nivelAlerta WMO': nivelMaximoAlerta,
-        };
+        return ClimaRespuesta(
+          temperatura: temperaturaActual,
+          sensacionTermica: sensacionTermicaActual,
+          estado: estadoActual,
+          codigoIcono: codigoIconoActual,
+          climaPrincipal: climaPrincipal,
+          iconoActual: iconoActual,
+          colorIconoActual: colorIconoActual,
+          pronostico: diasAfinados,
+          nivelAlerta: nivelMaximoAlerta,
+        );
       }
     } catch (e) {
-  debugPrint("Error en el servicio de clima: $e");
-}
-    return null; // Si algo falla, devuelve vacío
+      debugPrint("Error en el servicio de clima: $e");
+    }
+    return null;
   }
 }

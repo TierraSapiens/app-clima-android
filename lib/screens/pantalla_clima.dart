@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart'; 
-import 'package:app_clima_01/models/clima_model.dart'; // <-- El puente al Paso 1
+import 'package:url_launcher/url_launcher.dart';
+import 'package:app_clima_01/models/clima_model.dart';
 import 'package:app_clima_01/services/clima_service.dart';
 
 class PantallaClima extends StatefulWidget {
@@ -41,12 +38,7 @@ class _PantallaClimaState extends State<PantallaClima> {
 
   IconData _iconoAvisos = Icons.check_circle_outline_rounded;
   IconData _iconoAlertas = Icons.shield_outlined;
-  IconData obtenerIconoPorCodigo(String codigoApi) {
-    if (codigoApi.endsWith('n')) {
-      return Icons.nightlight_round; //Luna para la noche
-    }
-    return Icons.wb_sunny; //Sol para el dia (si termina en 'd')
-  }
+
   @override
   void initState() {
     super.initState();
@@ -113,116 +105,47 @@ class _PantallaClimaState extends State<PantallaClima> {
   }
 
   Future<void> _obtenerDatosDeAmbasAPIs(double lat, double lon) async {
-    const String apiKey = "d1f3d163ba58ae2e5fe2e027b312e550";
-    final urlActual = Uri.parse(
-      'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=metric&lang=es'
-    );
-
-    final urlForecast = Uri.parse(
-      'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4'
-    );
-
     try {
-      final resActual = await http.get(urlActual);
-      if (resActual.statusCode == 200) {
-        final datos = jsonDecode(resActual.body);
-        String climaPrincipal = datos['weather'][0]['main'];
-
-        setState(() {
-          _temperaturaActual = "${datos['main']['temp'].round()}";
-          _sensacionTermica = "${datos['main']['feels_like'].round()}";
-          String desc = datos['weather'][0]['description'];
-          _estadoClimaActual = desc.substring(0, 1).toUpperCase() + desc.substring(1);
-          
-//1.Mapeo por defecto (trae el color base)
-          var configIcono = _climaService.mapearClimaOpenWeather(climaPrincipal);
-          _colorIconoPrincipal = configIcono['color'];
-
-//2.Captura el codigo de icono de la api (ej: "01n" o "01d")
-          String codigoIconoApi = datos['weather'][0]['icon'];
-          
-//3.Usa nueva funcion para decidir si va Sol o Luna
-          _iconoClimaPrincipal = obtenerIconoPorCodigo(codigoIconoApi);
-
-//4.Si el codigo termina en 'n', le pone color de noche
-          if (codigoIconoApi.endsWith('d')) {
-          _colorIconoPrincipal = Colors.amber; // El color del SOL
-          } else {
-          _colorIconoPrincipal = Colors.blueGrey.shade100; // El color de la LUNA
-          }
-        });
+      final respuesta = await _climaService.obtenerDatosClima(lat, lon);
+      if (respuesta == null) {
+        setState(() => _estadoClimaActual = "No se pudieron cargar los datos");
+        return;
       }
 
-      final resForecast = await http.get(urlForecast);
-      if (resForecast.statusCode == 200) {
-        final datosMeteo = jsonDecode(resForecast.body);
-        final datosDiarios = datosMeteo['daily'];
+      setState(() {
+        _temperaturaActual = "${respuesta.temperatura}";
+        _sensacionTermica = "${respuesta.sensacionTermica}";
+        _estadoClimaActual = respuesta.estado;
+        _iconoClimaPrincipal = respuesta.iconoActual;
+        _colorIconoPrincipal = respuesta.colorIconoActual;
+        _pronosticoTresDias = respuesta.pronostico;
 
-        List<ClimaDia> diasAfinados = [];
-        int nivelMaximoAlerta = 0; 
+        if (respuesta.nivelAlerta == 2) {
+          _colorAvisosSMN = const Color(0xFFF97316);
+          _subtextoAvisos = "Zonas afectadas por lluvias intensas";
+          _iconoAvisos = Icons.warning_amber_rounded;
 
-        for (int i = 1; i <= 3; i++) {
-          String fechaRaw = datosDiarios['time'][i]; 
-          DateTime fechaParseada = DateTime.parse(fechaRaw);
+          _colorAlertasSMN = const Color(0xFFEF4444);
+          _subtextoAlertas = "Zonas críticas: Tormentas severas";
+          _iconoAlertas = Icons.gpp_bad_rounded;
+        } else if (respuesta.nivelAlerta == 1) {
+          _colorAvisosSMN = const Color(0xFFF97316);
+          _subtextoAvisos = "Zonas afectadas por chaparrones";
+          _iconoAvisos = Icons.warning_amber_rounded;
 
-          String diaSemana = DateFormat('EEE', 'es_AR').format(fechaParseada).toUpperCase().replaceAll('.', '');
-          String diaMes = DateFormat('dd/MM').format(fechaParseada);
-          String labelCompleto = "$diaSemana. $diaMes";
+          _colorAlertasSMN = const Color(0xFF22C55E);
+          _subtextoAlertas = "No hay Alertas";
+          _iconoAlertas = Icons.shield_outlined;
+        } else {
+          _colorAvisosSMN = const Color(0xFF22C55E);
+          _subtextoAvisos = "No hay avisos";
+          _iconoAvisos = Icons.check_circle_outline_rounded;
 
-          String max = "${datosDiarios['temperature_2m_max'][i].round()}°";
-          String min = "${datosDiarios['temperature_2m_min'][i].round()}°";
-          
-          int codigoWMO = datosDiarios['weather_code'][i];
-          
-          if (codigoWMO == 96 || codigoWMO == 99 || codigoWMO == 65 || codigoWMO == 82) {
-            if (nivelMaximoAlerta < 2) nivelMaximoAlerta = 2; 
-          } else if (codigoWMO == 95 || codigoWMO == 63 || codigoWMO == 81) {
-            if (nivelMaximoAlerta < 1) nivelMaximoAlerta = 1; 
-          }
-
-          var traduccion = _climaService.traducirCodigoWMO(codigoWMO);
-
-          diasAfinados.add(
-            ClimaDia(
-              fechaLabel: labelCompleto,
-              icono: traduccion['icono'],
-              colorIcono: traduccion['color'],
-              tempMaxMin: "$max / $min",
-              estado: traduccion['texto'],
-            ),
-          );
+          _colorAlertasSMN = const Color(0xFF22C55E);
+          _subtextoAlertas = "No hay Alertas";
+          _iconoAlertas = Icons.shield_outlined;
         }
-
-        setState(() {
-          _pronosticoTresDias = diasAfinados;
-
-          if (nivelMaximoAlerta == 2) {
-            _colorAvisosSMN = const Color(0xFFF97316); 
-            _subtextoAvisos = "Zonas afectadas por lluvias intensas";
-            _iconoAvisos = Icons.warning_amber_rounded;
-
-            _colorAlertasSMN = const Color(0xFFEF4444); 
-            _subtextoAlertas = "Zonas críticas: Tormentas severas";
-            _iconoAlertas = Icons.gpp_bad_rounded;
-          } else if (nivelMaximoAlerta == 1) {
-            _colorAvisosSMN = const Color(0xFFF97316); 
-            _subtextoAvisos = "Zonas afectadas por chaparrones";
-            _iconoAvisos = Icons.warning_amber_rounded;
-
-            _colorAlertasSMN = const Color(0xFF22C55E); 
-            _subtextoAlertas = "No hay Alertas";
-            _iconoAlertas = Icons.shield_outlined;
-          } else {
-            _colorAvisosSMN = const Color(0xFF22C55E); 
-            _subtextoAvisos = "No hay avisos";
-            _iconoAvisos = Icons.check_circle_outline_rounded;
-
-            _colorAlertasSMN = const Color(0xFF22C55E); 
-            _subtextoAlertas = "No hay Alertas";
-            _iconoAlertas = Icons.shield_outlined;
-          }
-        });
-      }
+      });
     } catch (e) {
       setState(() => _estadoClimaActual = "Error al sincronizar radares");
     }
