@@ -11,16 +11,6 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
-.ZControl
-.Originalmain.dart_001
-.Originalmain.dart_002
-.Originalmain.dart_003
-.Originalmain.dart_004
-.Originalmain.dart_005
-.Originalmain.dart_006
-.Originalmain.dart_007
-.Originalmain.dart_008
-
 
 # IntelliJ related
 *.iml
