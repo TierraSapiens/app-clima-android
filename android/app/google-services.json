@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "721083556839",
+    "project_id": "meteomarti-c929c",
+    "storage_bucket": "meteomarti-c929c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721083556839:android:b1d879ea0fb14391ea1342",
+        "android_client_info": {
+          "package_name": "com.example.app_clima_01"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0PsapAI18s4gFRm3Fv78pbD4cf4abZvU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
