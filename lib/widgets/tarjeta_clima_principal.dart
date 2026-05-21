@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_clima_01/config/app_theme.dart';
 import 'package:app_clima_01/models/clima_model.dart';
 
 class TarjetaClimaPrincipal extends StatelessWidget {
@@ -17,7 +18,7 @@ class TarjetaClimaPrincipal extends StatelessWidget {
       children: [
         Text(
           localidad,
-          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500, color: Colors.white),
+          style: AppTheme.title,
         ),
         const SizedBox(height: 15),
         Row(
@@ -34,7 +35,7 @@ class TarjetaClimaPrincipal extends StatelessWidget {
         const SizedBox(height: 5),
         Text(
           '${respuesta.estado} • Sensación térmica ${respuesta.sensacionTermica}°',
-          style: const TextStyle(fontSize: 16, color: Colors.white60, fontWeight: FontWeight.w400),
+          style: AppTheme.subtitle,
         ),
       ],
     );

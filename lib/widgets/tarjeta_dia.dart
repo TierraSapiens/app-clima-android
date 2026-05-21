@@ -1,5 +1,6 @@
 //Maneja el Pronóstico Extendido
 import 'package:flutter/material.dart';
+import 'package:app_clima_01/config/app_theme.dart';
 
 class TarjetaDia extends StatelessWidget {
   final String dia;
@@ -27,22 +28,22 @@ class TarjetaDia extends StatelessWidget {
           margin: const EdgeInsets.only(right: 14),
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B).withAlpha(153),
+            color: AppTheme.cardSurface.withAlpha(153),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: Colors.white10),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(dia, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white60)),
+              Text(dia, style: AppTheme.forecastLabel),
               const SizedBox(height: 8),
               Icon(icono, color: Colors.lightBlue.shade200, size: 28),
               const SizedBox(height: 8),
-              Text(temp, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              Text(temp, style: AppTheme.forecastTemp),
               const SizedBox(height: 6),
               Text(
                 estado,
-                style: const TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w400),
+                style: AppTheme.forecastStatus,
                 textAlign: TextAlign.center,
               ),
             ],

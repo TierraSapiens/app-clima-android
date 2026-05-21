@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:app_clima_01/config/app_theme.dart';
 import 'package:app_clima_01/models/clima_model.dart';
 import 'package:app_clima_01/services/clima_service.dart';
 import 'package:app_clima_01/widgets/boton_emergencia.dart';
@@ -20,8 +21,8 @@ class _PantallaClimaState extends State<PantallaClima> {
   String _localidadActual = "Buscando ubicación...";
   String _estadoClimaActual = "Cargando datos del cielo...";
 
-  Color _colorFondoSuperior = const Color(0xFF0F172A); 
-  Color _colorFondoInferior = const Color(0xFF020617);
+  Color _colorFondoSuperior = AppTheme.backgroundGradientTop;
+  Color _colorFondoInferior = AppTheme.backgroundGradientBottom;
 
   ClimaRespuesta? _climaActual;
   List<ClimaDia> _pronosticoTresDias = [];
@@ -51,17 +52,17 @@ class _PantallaClimaState extends State<PantallaClima> {
     final dia = ahora.day;
 
     if ((mes == 3 && dia >= 21) || mes == 4 || mes == 5 || (mes == 6 && dia < 21)) {
-      _colorFondoSuperior = const Color(0xFF1E1B18); 
-      _colorFondoInferior = const Color(0xFF0A0500);
+      _colorFondoSuperior = AppTheme.backgroundSpringTop;
+      _colorFondoInferior = AppTheme.backgroundSpringBottom;
     } else if ((mes == 6 && dia >= 21) || mes == 7 || mes == 8 || (mes == 9 && dia < 21)) {
-      _colorFondoSuperior = const Color(0xFF0F172A); 
-      _colorFondoInferior = const Color(0xFF020617);
+      _colorFondoSuperior = AppTheme.backgroundSummerTop;
+      _colorFondoInferior = AppTheme.backgroundSummerBottom;
     } else if ((mes == 9 && dia >= 21) || mes == 10 || mes == 11 || (mes == 12 && dia < 21)) {
-      _colorFondoSuperior = const Color(0xFF062419); 
-      _colorFondoInferior = const Color(0xFF020C08);
+      _colorFondoSuperior = AppTheme.backgroundAutumnTop;
+      _colorFondoInferior = AppTheme.backgroundAutumnBottom;
     } else {
-      _colorFondoSuperior = const Color(0xFF131A35); 
-      _colorFondoInferior = const Color(0xFF030712);
+      _colorFondoSuperior = AppTheme.backgroundWinterTop;
+      _colorFondoInferior = AppTheme.backgroundWinterBottom;
     }
   }
 
