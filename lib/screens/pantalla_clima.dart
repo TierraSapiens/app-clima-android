@@ -227,6 +227,7 @@ class _PantallaClimaState extends State<PantallaClima> {
                             return TarjetaDia(
                               dia: diaInfo.fechaLabel,
                               icono: diaInfo.icono,
+                              colorIcono: diaInfo.colorIcono,
                               temp: diaInfo.tempMaxMin,
                               estado: diaInfo.estado,
                               onTap: _abrirGraficoDetallado,
