@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:app_clima_01/config/app_theme.dart';
 import 'package:app_clima_01/models/clima_model.dart';
 import 'package:app_clima_01/services/clima_service.dart';
 import 'package:app_clima_01/widgets/boton_emergencia.dart';
 import 'package:app_clima_01/widgets/menu_lateral.dart';
 import 'package:app_clima_01/widgets/tarjeta_clima_principal.dart';
 import 'package:app_clima_01/widgets/tarjeta_dia.dart';
+import 'package:app_clima_01/views/clima/widgets/weather_background.dart';
 
 class PantallaClima extends StatefulWidget {
   const PantallaClima({super.key});
@@ -21,9 +21,6 @@ class _PantallaClimaState extends State<PantallaClima> {
   final ClimaService _climaService = ClimaService();
   String _localidadActual = "Buscando ubicación...";
   String _estadoClimaActual = "Cargando datos del cielo...";
-
-  Color _colorFondoSuperior = AppTheme.backgroundGradientTop;
-  Color _colorFondoInferior = AppTheme.backgroundGradientBottom;
 
   ClimaRespuesta? _climaActual;
   List<ClimaDia> _pronosticoTresDias = [];
@@ -43,29 +40,9 @@ class _PantallaClimaState extends State<PantallaClima> {
   @override
   void initState() {
     super.initState();
-    _calcularFondoPorEstacion();
     _obtenerUbicacionActual();
   }
 
-  void _calcularFondoPorEstacion() {
-    final ahora = DateTime.now();
-    final mes = ahora.month;
-    final dia = ahora.day;
-
-    if ((mes == 3 && dia >= 21) || mes == 4 || mes == 5 || (mes == 6 && dia < 21)) {
-      _colorFondoSuperior = AppTheme.backgroundSpringTop;
-      _colorFondoInferior = AppTheme.backgroundSpringBottom;
-    } else if ((mes == 6 && dia >= 21) || mes == 7 || mes == 8 || (mes == 9 && dia < 21)) {
-      _colorFondoSuperior = AppTheme.backgroundSummerTop;
-      _colorFondoInferior = AppTheme.backgroundSummerBottom;
-    } else if ((mes == 9 && dia >= 21) || mes == 10 || mes == 11 || (mes == 12 && dia < 21)) {
-      _colorFondoSuperior = AppTheme.backgroundAutumnTop;
-      _colorFondoInferior = AppTheme.backgroundAutumnBottom;
-    } else {
-      _colorFondoSuperior = AppTheme.backgroundWinterTop;
-      _colorFondoInferior = AppTheme.backgroundWinterBottom;
-    }
-  }
 
   Future<void> _obtenerUbicacionActual() async {
     bool servicioHabilitado = await Geolocator.isLocationServiceEnabled();
@@ -170,21 +147,14 @@ class _PantallaClimaState extends State<PantallaClima> {
 
   @override
   Widget build(BuildContext context) {
+    final String codigoIcono = _climaActual?.codigoIcono ?? '01d';
+
     return Scaffold(
       drawer: const MenuLateral(),
       body: Builder(
         builder: (context) {
-          return Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [_colorFondoSuperior, _colorFondoInferior],
-                stops: const [0.0, 0.65],
-              ),
-            ),
+          return WeatherBackground(
+            codigoIconoApi: codigoIcono,
             child: NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) {
                 return [
