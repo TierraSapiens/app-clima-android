@@ -185,19 +185,9 @@ class _PantallaClimaState extends State<PantallaClima> {
                 stops: const [0.0, 0.65],
               ),
             ),
-            child: NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  SliverAppBar(
-                    floating: true,
-                    snap: true,
-                    automaticallyImplyLeading: true,
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                  ),
-                ];
-              },
-              body: SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 24.0),
                   child: Column(
@@ -214,7 +204,7 @@ class _PantallaClimaState extends State<PantallaClima> {
                         ],
                       ),
                   
-                      const SizedBox(height: 60), //Baja o sube el clima actual
+                      const SizedBox(height: 20), //Baja o sube el clima actual
 
 // 1.CLIMA ACTUAL
                       _climaActual == null
