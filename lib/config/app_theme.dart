@@ -4,7 +4,7 @@ class AppTheme {
   static ThemeData get darkTheme => ThemeData.dark().copyWith(
         scaffoldBackgroundColor: backgroundGradientBottom,
         colorScheme: ThemeData.dark().colorScheme.copyWith(
-              background: backgroundGradientBottom,
+              surface: backgroundGradientBottom,
               primary: accentPrimary,
               secondary: accentPrimary,
             ),
