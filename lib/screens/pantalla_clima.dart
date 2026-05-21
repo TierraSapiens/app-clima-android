@@ -6,6 +6,7 @@ import 'package:app_clima_01/config/app_theme.dart';
 import 'package:app_clima_01/models/clima_model.dart';
 import 'package:app_clima_01/services/clima_service.dart';
 import 'package:app_clima_01/widgets/boton_emergencia.dart';
+import 'package:app_clima_01/widgets/menu_lateral.dart';
 import 'package:app_clima_01/widgets/tarjeta_clima_principal.dart';
 import 'package:app_clima_01/widgets/tarjeta_dia.dart';
 
@@ -170,6 +171,7 @@ class _PantallaClimaState extends State<PantallaClima> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const MenuLateral(),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -181,85 +183,98 @@ class _PantallaClimaState extends State<PantallaClima> {
             stops: const [0.0, 0.65],
           ),
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                
-                const SizedBox(height: 60), //Baja o sube el clima actual
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                floating: true,
+                snap: true,
+                automaticallyImplyLeading: true,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+              ),
+            ];
+          },
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  
+                  const SizedBox(height: 60), //Baja o sube el clima actual
 
 // 1.CLIMA ACTUAL
-                _climaActual == null
-                    ? Column(
-                        children: [
-                          Text(
-                            _localidadActual,
-                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500, color: Colors.white),
-                          ),
-                          const SizedBox(height: 15),
-                          const Center(child: CircularProgressIndicator()),
-                          const SizedBox(height: 15),
-                          Text(
-                            _estadoClimaActual,
-                            style: const TextStyle(fontSize: 16, color: Colors.white60, fontWeight: FontWeight.w400),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      )
-                    : TarjetaClimaPrincipal(
-                        localidad: _localidadActual,
-                        respuesta: _climaActual!,
-                      ),
+                  _climaActual == null
+                      ? Column(
+                          children: [
+                            Text(
+                              _localidadActual,
+                              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500, color: Colors.white),
+                            ),
+                            const SizedBox(height: 15),
+                            const Center(child: CircularProgressIndicator()),
+                            const SizedBox(height: 15),
+                            Text(
+                              _estadoClimaActual,
+                              style: const TextStyle(fontSize: 16, color: Colors.white60, fontWeight: FontWeight.w400),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        )
+                      : TarjetaClimaPrincipal(
+                          localidad: _localidadActual,
+                          respuesta: _climaActual!,
+                        ),
 
-                const SizedBox(height: 60), //Baja o sube pronostico
+                  const SizedBox(height: 60), //Baja o sube pronostico
 
 //2. PRONÓSTICO DE 3 Dias
-                _pronosticoTresDias.isEmpty
-                    ? const Center(child: CircularProgressIndicator()) 
-                    : SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        child: Row(
-                          children: _pronosticoTresDias.map((diaInfo) {
-                            return TarjetaDia(
-                              dia: diaInfo.fechaLabel,
-                              icono: diaInfo.icono,
-                              colorIcono: diaInfo.colorIcono,
-                              temp: diaInfo.tempMaxMin,
-                              estado: diaInfo.estado,
-                              onTap: _abrirGraficoDetallado,
-                            );
-                          }).toList(),
+                  _pronosticoTresDias.isEmpty
+                      ? const Center(child: CircularProgressIndicator()) 
+                      : SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          child: Row(
+                            children: _pronosticoTresDias.map((diaInfo) {
+                              return TarjetaDia(
+                                dia: diaInfo.fechaLabel,
+                                icono: diaInfo.icono,
+                                colorIcono: diaInfo.colorIcono,
+                                temp: diaInfo.tempMaxMin,
+                                estado: diaInfo.estado,
+                                onTap: _abrirGraficoDetallado,
+                              );
+                            }).toList(),
+                          ),
                         ),
-                      ),
 
-                const SizedBox(height: 60), // Sube y Baja los carteles de Avisos y ALERTAS
+                  const SizedBox(height: 60), // Sube y Baja los carteles de Avisos y ALERTAS
 
 //3.AVISOS Y ALERTAS, configuracion Semaforo de SMN
-                Column(
-                  children: [
-                    BotonEmergencia(
-                      texto: 'AVISOS METEOROLÓGICOS',
-                      subtexto: _subtextoAvisos,
-                      colorAccento: _colorAvisosSMN,
-                      icono: _iconoAvisos,
-                      onTap: _abrirAlertasSMN,
-                    ),
-                    const SizedBox(height: 14), //los dos botones estén más pegados entre sí bajar ese 14 a un 8 o 10
-                    BotonEmergencia(
-                      texto: 'ALERTAS CRÍTICAS',
-                      subtexto: _subtextoAlertas,
-                      colorAccento: _colorAlertasSMN,
-                      icono: _iconoAlertas,
-                      onTap: _abrirAlertasSMN,
-                    ),
-                  ],
-                ),
+                  Column(
+                    children: [
+                      BotonEmergencia(
+                        texto: 'AVISOS METEOROLÓGICOS',
+                        subtexto: _subtextoAvisos,
+                        colorAccento: _colorAvisosSMN,
+                        icono: _iconoAvisos,
+                        onTap: _abrirAlertasSMN,
+                      ),
+                      const SizedBox(height: 14), //los dos botones estén más pegados entre sí bajar ese 14 a un 8 o 10
+                      BotonEmergencia(
+                        texto: 'ALERTAS CRÍTICAS',
+                        subtexto: _subtextoAlertas,
+                        colorAccento: _colorAlertasSMN,
+                        icono: _iconoAlertas,
+                        onTap: _abrirAlertasSMN,
+                      ),
+                    ],
+                  ),
 
-              ],
+                ],
+              ),
             ),
           ),
         ),
