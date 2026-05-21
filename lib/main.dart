@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:app_clima_01/config/app_theme.dart';
 import 'package:app_clima_01/firebase/conexion_firebase.dart';
-import 'package:app_clima_01/screens/pantalla_clima.dart';
+import 'package:app_clima_01/views/clima/pantalla_clima.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
