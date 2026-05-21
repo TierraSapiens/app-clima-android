@@ -167,23 +167,13 @@ class _PantallaClimaState extends State<PantallaClima> {
                   ),
                 ];
               },
-              body: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.menu, color: Colors.white),
-                            onPressed: () => Scaffold.of(context).openDrawer(),
-                          ),
-                        ],
-                      ),
-                  
+              body: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+
                       const SizedBox(height: 60), //Baja o sube el clima actual
 
 // 1.CLIMA ACTUAL
@@ -242,7 +232,6 @@ class _PantallaClimaState extends State<PantallaClima> {
                     ],
                   ),
                 ),
-              ),
             ),
           );
         },
