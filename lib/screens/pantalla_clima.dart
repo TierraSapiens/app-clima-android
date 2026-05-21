@@ -4,6 +4,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:app_clima_01/models/clima_model.dart';
 import 'package:app_clima_01/services/clima_service.dart';
+import 'package:app_clima_01/widgets/boton_emergencia.dart';
+import 'package:app_clima_01/widgets/tarjeta_dia.dart';
 
 class PantallaClima extends StatefulWidget {
   const PantallaClima({super.key});
@@ -232,11 +234,12 @@ class _PantallaClimaState extends State<PantallaClima> {
                         physics: const BouncingScrollPhysics(),
                         child: Row(
                           children: _pronosticoTresDias.map((diaInfo) {
-                            return _tarjetaDia(
-                              diaInfo.fechaLabel,
-                              diaInfo.icono,
-                              diaInfo.tempMaxMin,
-                              diaInfo.estado,
+                            return TarjetaDia(
+                              dia: diaInfo.fechaLabel,
+                              icono: diaInfo.icono,
+                              temp: diaInfo.tempMaxMin,
+                              estado: diaInfo.estado,
+                              onTap: _abrirGraficoDetallado,
                             );
                           }).toList(),
                         ),
@@ -247,7 +250,7 @@ class _PantallaClimaState extends State<PantallaClima> {
 //3.AVISOS Y ALERTAS, configuracion Semaforo de SMN
                 Column(
                   children: [
-                    _botonEmergencia(
+                    BotonEmergencia(
                       texto: 'AVISOS METEOROLÓGICOS',
                       subtexto: _subtextoAvisos,
                       colorAccento: _colorAvisosSMN,
@@ -255,7 +258,7 @@ class _PantallaClimaState extends State<PantallaClima> {
                       onTap: _abrirAlertasSMN,
                     ),
                     const SizedBox(height: 14), //los dos botones estén más pegados entre sí bajar ese 14 a un 8 o 10
-                    _botonEmergencia(
+                    BotonEmergencia(
                       texto: 'ALERTAS CRÍTICAS',
                       subtexto: _subtextoAlertas,
                       colorAccento: _colorAlertasSMN,
@@ -273,82 +276,4 @@ class _PantallaClimaState extends State<PantallaClima> {
     );
   }
 
-  Widget _tarjetaDia(String dia, IconData icono, String temp, String estado) {
-    return GestureDetector(
-      onTap: _abrirGraficoDetallado, 
-      child: IntrinsicWidth(
-        child: Container(
-          height: 135,
-          margin: const EdgeInsets.only(right: 14),
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E293B).withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white10),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(dia, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white60)),
-              const SizedBox(height: 8),
-              Icon(icono, color: Colors.lightBlue.shade200, size: 28),
-              const SizedBox(height: 8),
-              Text(temp, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
-              Text(
-                estado, 
-                style: const TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w400),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _botonEmergencia({ //cambiar el tamaño y la altura real de botones Alerta, Aviso.
-    required String texto,
-    required String subtexto,
-    required Color colorAccento,
-    required IconData icono,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0F172A).withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: colorAccento.withValues(alpha: 0.4), width: 1.5),
-        ),
-        child: Row(
-          children: [
-            Icon(icono, color: colorAccento, size: 32),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    texto, 
-                    style: TextStyle(
-                      fontSize: 15, 
-                      fontWeight: FontWeight.bold, 
-                      color: colorAccento
-                    )
-                  ),
-                  const SizedBox(height: 2),
-                  Text(subtexto, style: const TextStyle(fontSize: 12, color: Colors.white38)),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white12, size: 14),
-          ],
-        ),
-      ),
-    );
-  }
 }
