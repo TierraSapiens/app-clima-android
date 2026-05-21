@@ -1,3 +1,4 @@
+//Logica de los Botones de Alertas y Avisos
 import 'package:flutter/material.dart';
 
 class BotonEmergencia extends StatelessWidget {

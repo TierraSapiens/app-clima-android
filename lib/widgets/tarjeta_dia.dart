@@ -1,3 +1,4 @@
+//Maneja el Pronóstico Extendido
 import 'package:flutter/material.dart';
 
 class TarjetaDia extends StatelessWidget {

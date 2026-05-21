@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:app_clima_01/models/clima_model.dart';
 import 'package:app_clima_01/services/clima_service.dart';
 import 'package:app_clima_01/widgets/boton_emergencia.dart';
+import 'package:app_clima_01/widgets/tarjeta_clima_principal.dart';
 import 'package:app_clima_01/widgets/tarjeta_dia.dart';
 
 class PantallaClima extends StatefulWidget {
@@ -17,16 +18,12 @@ class PantallaClima extends StatefulWidget {
 class _PantallaClimaState extends State<PantallaClima> {
   final ClimaService _climaService = ClimaService();
   String _localidadActual = "Buscando ubicación...";
-  String _temperaturaActual = "--";
-  String _sensacionTermica = "--";
   String _estadoClimaActual = "Cargando datos del cielo...";
-  
-  IconData _iconoClimaPrincipal = Icons.wb_cloudy_rounded;
-  Color _colorIconoPrincipal = Colors.blue.shade200;
 
   Color _colorFondoSuperior = const Color(0xFF0F172A); 
   Color _colorFondoInferior = const Color(0xFF020617);
 
+  ClimaRespuesta? _climaActual;
   List<ClimaDia> _pronosticoTresDias = [];
 
   double _latitudGuardada = 0.0;
@@ -115,11 +112,7 @@ class _PantallaClimaState extends State<PantallaClima> {
       }
 
       setState(() {
-        _temperaturaActual = "${respuesta.temperatura}";
-        _sensacionTermica = "${respuesta.sensacionTermica}";
-        _estadoClimaActual = respuesta.estado;
-        _iconoClimaPrincipal = respuesta.iconoActual;
-        _colorIconoPrincipal = respuesta.colorIconoActual;
+        _climaActual = respuesta;
         _pronosticoTresDias = respuesta.pronostico;
 
         if (respuesta.nivelAlerta == 2) {
@@ -198,31 +191,27 @@ class _PantallaClimaState extends State<PantallaClima> {
                 const SizedBox(height: 60), //Baja o sube el clima actual
 
 // 1.CLIMA ACTUAL
-                Column(
-                  children: [
-                    Text(
-                      _localidadActual,
-                      style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500, color: Colors.white),
-                    ),
-                    const SizedBox(height: 15),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(_iconoClimaPrincipal, size: 85, color: _colorIconoPrincipal),
-                        const SizedBox(width: 25),
-                        Text(
-                          '$_temperaturaActual°',
-                          style: const TextStyle(fontSize: 95, fontWeight: FontWeight.bold, letterSpacing: -2),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      '$_estadoClimaActual • Sensación térmica $_sensacionTermica°',
-                      style: const TextStyle(fontSize: 16, color: Colors.white60, fontWeight: FontWeight.w400),
-                    ),
-                  ],
-                ),
+                _climaActual == null
+                    ? Column(
+                        children: [
+                          Text(
+                            _localidadActual,
+                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500, color: Colors.white),
+                          ),
+                          const SizedBox(height: 15),
+                          const Center(child: CircularProgressIndicator()),
+                          const SizedBox(height: 15),
+                          Text(
+                            _estadoClimaActual,
+                            style: const TextStyle(fontSize: 16, color: Colors.white60, fontWeight: FontWeight.w400),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      )
+                    : TarjetaClimaPrincipal(
+                        localidad: _localidadActual,
+                        respuesta: _climaActual!,
+                      ),
 
                 const SizedBox(height: 60), //Baja o sube pronostico
 

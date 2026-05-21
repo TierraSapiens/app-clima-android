@@ -1,45 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:intl/intl.dart';
 import 'package:app_clima_01/models/clima_model.dart';
+import 'package:app_clima_01/utils/conversores_clima.dart';
 
 class ClimaService {
-  Map<String, dynamic> mapearClimaOpenWeather(String condicion) {
-    if (condicion == 'Clear') {
-      return {'icono': Icons.wb_sunny_rounded, 'color': const Color(0xFFFCD34D)};
-    } else if (condicion == 'Clouds') {
-      return {'icono': Icons.wb_cloudy_rounded, 'color': const Color(0xFF94A3B8)};
-    } else if (condicion == 'Rain' || condicion == 'Drizzle') {
-      return {'icono': Icons.umbrella_rounded, 'color': const Color(0xFF60A5FA)};
-    } else if (condicion == 'Thunderstorm') {
-      return {'icono': Icons.thunderstorm_rounded, 'color': const Color(0xFFA855F7)};
-    } else {
-      return {'icono': Icons.cloud_queue_rounded, 'color': Colors.white70};
-    }
-  }
-
-  Map<String, dynamic> traducirCodigoWMO(int codigo) {
-    if (codigo == 0) {
-      return {'icono': Icons.wb_sunny_rounded, 'color': const Color(0xFFFCD34D), 'texto': 'Soleado'};
-    } else if (codigo >= 1 && codigo <= 3) {
-      return {'icono': Icons.wb_cloudy_rounded, 'color': const Color(0xFF94A3B8), 'texto': 'Sol y nubes'};
-    } else if ((codigo >= 51 && codigo <= 67) || (codigo >= 80 && codigo <= 82)) {
-      return {'icono': Icons.umbrella_rounded, 'color': const Color(0xFF60A5FA), 'texto': 'Lluvia probable'};
-    } else if (codigo >= 95 && codigo <= 99) {
-      return {'icono': Icons.thunderstorm_rounded, 'color': const Color(0xFFA855F7), 'texto': 'Tormenta eléctrica'};
-    } else {
-      return {'icono': Icons.cloud_queue_rounded, 'color': Colors.white70, 'texto': 'Nublado'};
-    }
-  }
-
-  IconData obtenerIconoPorCodigo(String codigoIconoApi) {
-    if (codigoIconoApi.endsWith('n')) {
-      return Icons.nightlight_round;
-    }
-    return Icons.wb_sunny;
-  }
-
   Future<ClimaRespuesta?> obtenerDatosClima(double lat, double lon) async {
     const String apiKey = "d1f3d163ba58ae2e5fe2e027b312e550";
 
@@ -63,7 +28,7 @@ class ClimaService {
         final int temperaturaActual = datosActual['main']['temp'].round();
         final int sensacionTermicaActual = datosActual['main']['feels_like'].round();
         final String descripcionActual = datosActual['weather'][0]['description'];
-        final String estadoActual = descripcionActual.substring(0, 1).toUpperCase() + descripcionActual.substring(1);
+        final String estadoActual = capitalizarPrimeraLetra(descripcionActual);
         final String codigoIconoActual = datosActual['weather'][0]['icon'];
         final String climaPrincipal = datosActual['weather'][0]['main'];
 
@@ -78,10 +43,7 @@ class ClimaService {
         for (int i = 1; i <= 3; i++) {
           String fechaRaw = datosDiarios['time'][i];
           DateTime fechaParseada = DateTime.parse(fechaRaw);
-
-          String diaSemana = DateFormat('EEE', 'es_AR').format(fechaParseada).toUpperCase().replaceAll('.', '');
-          String diaMes = DateFormat('dd/MM').format(fechaParseada);
-          String labelCompleto = "$diaSemana. $diaMes";
+          String labelCompleto = formatearLabelPronostico(fechaParseada);
 
           String max = "${datosDiarios['temperature_2m_max'][i].round()}°";
           String min = "${datosDiarios['temperature_2m_min'][i].round()}°";
