@@ -12,64 +12,130 @@ class TarjetaClimaPrincipal extends StatelessWidget {
     required this.respuesta,
   });
 
+  // Función para determinar cuál de tus imágenes usar según el código de OpenWeatherMap
+  String _obtenerRutaFondo(String codigoIcono) {
+    switch (codigoIcono) {
+      case '01d': // Cielo despejado día
+        return 'assets/images/cielo_dia_despejado.jpg';
+      case '01n': // Cielo despejado noche
+        return 'assets/images/cielo_noche_despejado.jpg';
+      case '02d': // Pocas nubes día
+      case '03d': // Nubes dispersas día
+      case '04d': // Nublado día
+        return 'assets/images/cielo_dia_nublado.jpg';
+      case '02n': // Pocas nubes noche
+      case '03n': // Nubes dispersas noche
+      case '04n': // Nublado noche
+        return 'assets/images/cielo_noche_nublado.jpg';
+      case '09d': // Lluvia ligera día
+      case '10d': // Lluvia día
+      case '11d': // Tormenta día
+        return 'assets/images/cielo_dia_lluvia.jpg';
+      case '09n': // Lluvia ligera noche
+      case '10n': // Lluvia noche
+      case '11n': // Tormenta noche
+        return 'assets/images/cielo_noche_lluvia.jpg';
+      default:
+        // Respaldo por si llega un código raro de nieve (13) o niebla (50)
+        return codigoIcono.endsWith('d') 
+            ? 'assets/images/cielo_dia_despejado.jpg' 
+            : 'assets/images/cielo_noche_despejado.jpg';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // URL del icono a color que va superpuesto
+    final String urlIconoClima = 'https://openweathermap.org{respuesta.codigoIcono}@4x.png';
+    // Ruta de tu imagen de fondo local
+    final String rutaFondo = _obtenerRutaFondo(respuesta.codigoIcono);
+
     return Container(
-      // Un espaciado interno para albergar el resplandor cómodamente
-      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+      width: double.infinity, // Obliga a la tarjeta a usar todo el ancho de la pantalla
       decoration: BoxDecoration(
-        // Genera un sutil degradado radial detrás del icono y la temperatura
-        gradient: RadialGradient(
-          center: const Alignment(0.0, 0.1), // Centrado levemente hacia abajo
-          radius: 0.8,
-          colors: [
-            // Usa el color del icono con opacidad para el centro del resplandor
-            respuesta.colorIconoActual.withValues(alpha: 0.12),
-            Colors.transparent, // Se desvanece hacia el fondo negro de la app
-          ],
+        // Agregamos esquinas redondeadas inferiores para que se vea más premium antes del pronóstico
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+        // Aquí cargamos tu imagen de fondo
+        image: DecorationImage(
+          image: AssetImage(rutaFondo),
+          fit: BoxFit.cover, // Hace que la imagen cubra todo el contenedor sin deformarse
+          // Agregamos un filtro oscuro sutil para que las letras blancas se sigan leyendo perfecto
+          colorFilter: ColorFilter.mode(
+            Colors.black.withValues(alpha: 0.35),
+            BlendMode.srcOver,
+          ),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            localidad,
-            style: AppTheme.title.copyWith(
-              letterSpacing: 0.5,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 20), // Un poco más de aire con la localidad
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // El icono con un tamaño imponente y estilizado
-              Icon(
-                respuesta.iconoActual, 
-                size: 90, 
-                color: respuesta.colorIconoActual,
+      // Mantenemos el padding interno para los textos e iconos
+      padding: const EdgeInsets.only(top: 40.0, bottom: 32.0, left: 16.0, right: 16.0),
+      child: SafeArea(
+        bottom: false, // Evita espacios extras abajo
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              localidad,
+              style: AppTheme.title.copyWith(
+                letterSpacing: 0.5,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+                // Agregamos una sombra al texto para asegurar legibilidad sobre cualquier cielo
+                shadows: [
+                  const Shadow(blurRadius: 8.0, color: Colors.black45, offset: Offset(0, 2))
+                ],
               ),
-              const SizedBox(width: 20),
-              Text(
-                '${respuesta.temperatura}°',
-                style: const TextStyle(
-                  fontSize: 100, // Un toque más grande para dar jerarquía
-                  fontWeight: FontWeight.w600, // W600 suele verse más premium que bold puro en fuentes grandes
-                  letterSpacing: -4, // Ajuste de kerning para números grandes
-                  height: 1.0, // Evita espacios fantasma arriba y abajo del texto
+            ),
+            const SizedBox(height: 15), 
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // El icono a color oficial flotando sobre el fondo de cielo
+                Image.network(
+                  urlIconoClima,
+                  width: 110, 
+                  height: 110,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      respuesta.iconoActual,
+                      size: 80,
+                      color: respuesta.colorIconoActual,
+                    );
+                  },
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20), // Más separación antes del subtítulo
-          Text(
-            '${respuesta.estado}  •  Sensación térmica ${respuesta.sensacionTermica}°',
-            style: AppTheme.subtitle.copyWith(
-              color: Colors.white70, // Mayor contraste para facilitar la lectura
+                const SizedBox(width: 10),
+                Text(
+                  '${respuesta.temperatura}°',
+                  style: const TextStyle(
+                    fontSize: 85, 
+                    fontWeight: FontWeight.w600, 
+                    letterSpacing: -4, 
+                    height: 1.0, 
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(blurRadius: 10.0, color: Colors.black38, offset: Offset(0, 2))
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 20), 
+            Text(
+              '${respuesta.estado}  •  Sensación térmica ${respuesta.sensacionTermica}°',
+              style: AppTheme.subtitle.copyWith(
+                color: Colors.white.withValues(alpha: 0.9), 
+                fontWeight: FontWeight.w500,
+                shadows: [
+                  const Shadow(blurRadius: 6.0, color: Colors.black45, offset: Offset(0, 1))
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
