@@ -18,29 +18,27 @@ class TarjetaDia extends StatelessWidget {
     required this.estado,
     required this.onTap,
   });
-
-  @override
+    @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: IntrinsicWidth(
         child: Container(
-          height: 145, // 📐 Aumentamos ligeramente para que los textos respiren mejor
+          height: 145, 
           margin: const EdgeInsets.only(right: 14),
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
           decoration: BoxDecoration(
-            // ✨ MEJORA: Un gris sólido premium un poco más claro que el fondo negro de la app
             color: const Color(0xFF161618), 
-            borderRadius: BorderRadius.circular(20), // Bordes más suaves y modernos
-              border: Border.all(
-              // 🔍 MEJORA: Borde con opacidad blanca que ayuda a recortar la tarjeta sobre el fondo oscuro
-              color: Colors.white.withValues(alpha: 0.06), 
+            borderRadius: BorderRadius.circular(20), 
+            border: Border.all(
+              // CORREGIDO: Agregamos la coma al final y usamos withValues para tu Flutter moderno
+              color: Colors.white.withValues(alpha: 0.06),
               width: 1.2,
             ),
-            // 💡 OPCIONAL: Una sombra muy suave para despegar la tarjeta tridimensionalmente
-              boxShadow: [
+            boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
+                // CORREGIDO: Agregamos la coma al final y usamos withValues
+                color: Colors.black.withValues(alpha: 0.15),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

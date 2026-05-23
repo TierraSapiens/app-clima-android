@@ -168,7 +168,38 @@ class _PantallaClimaState extends State<PantallaClima> {
     }
   }
 
-  @override
+  Widget _buildCargandoClima() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 100.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            _localidadActual,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const CircularProgressIndicator(color: Colors.white),
+          const SizedBox(height: 20),
+          Text(
+            _estadoClimaActual,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.white70,
+              fontWeight: FontWeight.w400,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const MenuLateral(),
@@ -187,105 +218,95 @@ class _PantallaClimaState extends State<PantallaClima> {
             ),
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.menu, color: Colors.white),
-                            onPressed: () => Scaffold.of(context).openDrawer(),
-                          ),
-                        ],
-                      ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
                   
-                      const SizedBox(height: 20), //Baja o sube el clima actual
-
-// 1.CLIMA ACTUAL
-                      _climaActual == null
-                          ? _buildCargandoClima()
-                          : TarjetaClimaPrincipal(
+                  // 1. CLIMA ACTUAL (STACK DE BORDE A BORDE)
+                  _climaActual == null
+                      ? _buildCargandoClima()
+                      : Stack(
+                          children: [
+                            // La tarjeta toca los bordes y sube al techo perfectamente
+                            TarjetaClimaPrincipal(
                               localidad: _localidadActual,
                               respuesta: _climaActual!,
                             ),
-
-                      const SizedBox(height: 60), //Baja o sube pronostico
-
-//2. PRONÓSTICO DE 3 Dias
-                      _pronosticoTresDias.isEmpty
-                          ? const Center(child: CircularProgressIndicator()) 
-                          : SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              physics: const BouncingScrollPhysics(),
-                              child: Row(
-                                children: _pronosticoTresDias.map((diaInfo) {
-                                  return TarjetaDia(
-                                    dia: diaInfo.fechaLabel,
-                                    icono: diaInfo.icono,
-                                    colorIcono: diaInfo.colorIcono,
-                                    temp: diaInfo.tempMaxMin,
-                                    estado: diaInfo.estado,
-                                    onTap: _abrirGraficoDetallado,
-                                  );
-                                }).toList(),
+                            // Botón de menú flotando arriba a la izquierda sobre la imagen
+                            Positioned(
+                              top: MediaQuery.of(context).padding.top + 10,
+                              left: 16,
+                              child: IconButton(
+                                icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                                onPressed: () => Scaffold.of(context).openDrawer(),
                               ),
                             ),
+                          ],
+                        ),
 
-                      const SizedBox(height: 60), // Sube y Baja los carteles de Avisos y ALERTAS
+                  // 2. CONTENIDO INFERIOR CON MÁRGENES Y RESPONSIVIDAD
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        
+                        // Fila de pronósticos con Scroll Horizontal
+                        _pronosticoTresDias.isEmpty
+                            ? const SizedBox()
+                            : SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: _pronosticoTresDias.map((dia) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(right: 12.0),
+                                      child: TarjetaDia(
+                                        dia: dia.fechaLabel,
+                                        icono: dia.icono,
+                                        colorIcono: dia.colorIcono,
+                                        temp: dia.tempMaxMin,
+                                        estado: dia.estado,
+                                        onTap: _abrirGraficoDetallado,
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
 
-//3.AVISOS Y ALERTAS, configuracion Semaforo de SMN
-                      Column(
-                        children: [
-                          BotonEmergencia(
-                            texto: 'AVISOS METEOROLÓGICOS',
-                            subtexto: _subtextoAvisos,
-                            colorAccento: _colorAvisosSMN,
-                            icono: _iconoAvisos,
-                            onTap: _abrirAlertasSMN,
-                          ),
-                          const SizedBox(height: 14), //los dos botones estén más pegados entre sí bajar ese 14 a un 8 o 10
-                          BotonEmergencia(
-                            texto: 'ALERTAS CRÍTICAS',
-                            subtexto: _subtextoAlertas,
-                            colorAccento: _colorAlertasSMN,
-                            icono: _iconoAlertas,
-                            onTap: _abrirAlertasSMN,
-                          ),
-                        ],
-                      ),
+                        const SizedBox(height: 40),
 
-                    ],
+                        // AJUSTE CLAVE: Alimentamos tu BotonEmergencia con los parámetros requeridos
+                        BotonEmergencia(
+                          texto: "AVISOS METEOROLÓGICOS",
+                          subtexto: _subtextoAvisos,
+                          colorAccento: _colorAvisosSMN,
+                          icono: _iconoAvisos,
+                          onTap: _abrirAlertasSMN,
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Invocamos un segundo botón para las Alertas Críticas usando el mismo Widget reutilizable
+                        BotonEmergencia(
+                          texto: "ALERTAS CRÍTICAS",
+                          subtexto: _subtextoAlertas,
+                          colorAccento: _colorAlertasSMN,
+                          icono: _iconoAlertas,
+                          onTap: _abrirAlertasSMN,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           );
         },
       ),
-    );
-  }
-
-  Widget _buildCargandoClima() {
-    return Column(
-      children: [
-        Text(
-          _localidadActual,
-          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500, color: Colors.white),
-        ),
-        const SizedBox(height: 15),
-        const Center(child: CircularProgressIndicator()),
-        const SizedBox(height: 15),
-        Text(
-          _estadoClimaActual,
-          style: const TextStyle(fontSize: 16, color: Colors.white60, fontWeight: FontWeight.w400),
-          textAlign: TextAlign.center,
-        ),
-      ],
     );
   }
 }
