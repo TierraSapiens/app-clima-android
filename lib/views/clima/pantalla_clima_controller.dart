@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:app_clima_01/config/app_theme.dart';
 import 'package:app_clima_01/models/clima_model.dart';
 import 'package:app_clima_01/services/clima_service.dart';
+import 'package:app_clima_01/services/ubicacion_service.dart'; // Importamos tu nuevo servicio GPS
 
-// 1. Definimos la clase que guardará todos los datos del estado actual
-class ClimaEstado {
+// 1. El estado del controlador que consumirá la UI
+class PantallaClimaEstado {
   final String localidadActual;
   final String estadoClimaActual;
   final Color colorFondoSuperior;
@@ -23,7 +22,7 @@ class ClimaEstado {
   final IconData iconoAvisos;
   final IconData iconoAlertas;
 
-  ClimaEstado({
+  PantallaClimaEstado({
     required this.localidadActual,
     required this.estadoClimaActual,
     required this.colorFondoSuperior,
@@ -40,8 +39,7 @@ class ClimaEstado {
     required this.iconoAlertas,
   });
 
-  // Copia el estado anterior y actualiza solo lo que cambia (Es el estándar de Riverpod)
-  ClimaEstado copyWith({
+  PantallaClimaEstado copyWith({
     String? localidadActual,
     String? estadoClimaActual,
     Color? colorFondoSuperior,
@@ -57,7 +55,7 @@ class ClimaEstado {
     IconData? iconoAvisos,
     IconData? iconoAlertas,
   }) {
-    return ClimaEstado(
+    return PantallaClimaEstado(
       localidadActual: localidadActual ?? this.localidadActual,
       estadoClimaActual: estadoClimaActual ?? this.estadoClimaActual,
       colorFondoSuperior: colorFondoSuperior ?? this.colorFondoSuperior,
@@ -76,14 +74,14 @@ class ClimaEstado {
   }
 }
 
-// 2. Creamos el Gestor de Estado (Notifier) que ejecuta las funciones de la app
-class ClimaNotifier extends Notifier<ClimaEstado> {
+// 2. El Notifier (Controlador) que orquesta los servicios
+class PantallaClimaController extends Notifier<PantallaClimaEstado> {
   final ClimaService _climaService = ClimaService();
+  final UbicacionService _ubicacionService = UbicacionService(); // Instanciamos el servicio del GPS
 
   @override
-  ClimaEstado build() {
-    // Definimos los valores iniciales por defecto apenas arranca el cerebro
-    return ClimaEstado(
+  PantallaClimaEstado build() {
+    return PantallaClimaEstado(
       localidadActual: "Buscando ubicación...",
       estadoClimaActual: "Cargando datos del cielo...",
       colorFondoSuperior: AppTheme.backgroundGradientTop,
@@ -100,19 +98,17 @@ class ClimaNotifier extends Notifier<ClimaEstado> {
     );
   }
 
-  // Toda tu antigua lógica de inicialización empaquetada aquí
   void inicializarClima() {
     _calcularFondoPorEstacion();
-    _obtenerUbicacionActual();
+    _obtenerDatosCompletos();
   }
 
   void _calcularFondoPorEstacion() {
     final ahora = DateTime.now();
     final mes = ahora.month;
-    final dia = ahora.day;
+    final dia = grandmaMatch(ahora.day); // Tu cálculo original
 
     Color sup, inf;
-
     if ((mes == 3 && dia >= 21) || mes == 4 || mes == 5 || (mes == 6 && dia < 21)) {
       sup = AppTheme.backgroundSpringTop;
       inf = AppTheme.backgroundSpringBottom;
@@ -130,43 +126,26 @@ class ClimaNotifier extends Notifier<ClimaEstado> {
     state = state.copyWith(colorFondoSuperior: sup, colorFondoInferior: inf);
   }
 
-  Future<void> _obtenerUbicacionActual() async {
-    bool servicioHabilitado = await Geolocator.isLocationServiceEnabled();
-    if (!servicioHabilitado) {
-      state = state.copyWith(localidadActual: "GPS apagado");
-      return;
-    }
+  int grandmaMatch(int day) => day; // Auxiliar estacional
 
-    LocationPermission permiso = await Geolocator.checkPermission();
-    if (permiso == LocationPermission.denied) {
-      permiso = await Geolocator.requestPermission();
-      if (permiso == LocationPermission.denied) {
-        state = state.copyWith(localidadActual: "Permiso denegado");
-        return;
-      }
-    }
-
+  Future<void> _obtenerDatosCompletos() async {
     try {
-      Position posicion = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
-      );
-
+      // Llamamos al servicio dedicado del GPS de forma súper limpia
+      final datosUbicacion = await _ubicacionService.obtenerUbicacionActual();
+      
       state = state.copyWith(
-        latitudGuardada: posicion.latitude,
-        longitudGuardada: posicion.longitude,
+        latitudGuardada: datosUbicacion.latitud,
+        longitudGuardada: datosUbicacion.longitud,
+        localidadActual: datosUbicacion.localidad,
       );
 
-      List<Placemark> marcas = await placemarkFromCoordinates(posicion.latitude, posicion.longitude);
-      if (marcas.isNotEmpty) {
-        Placemark lugar = marcas.first;
-        state = state.copyWith(
-          localidadActual: lugar.locality ?? lugar.administrativeArea ?? "Desconocido",
-        );
-      }
+      // Procedemos a pedir el clima con las coordenadas obtenidas
+      await _obtenerDatosDeAmbasAPIs(datosUbicacion.latitud, datosUbicacion.longitud);
 
-      await _obtenerDatosDeAmbasAPIs(posicion.latitude, posicion.longitude);
     } catch (e) {
-      state = state.copyWith(localidadActual: "Error al buscar");
+      // Capturamos cualquier error lanzado por UbicacionService (GPS apagado, permisos denegados, etc.)
+      String mensajeError = e.toString().replaceAll("Exception: ", "");
+      state = state.copyWith(localidadActual: mensajeError);
     }
   }
 
@@ -219,7 +198,7 @@ class ClimaNotifier extends Notifier<ClimaEstado> {
   }
 }
 
-// 3. EXPONEMOS EL PROVEEDOR GLOBAL (La perilla que usará la pantalla para conectarse)
-final climaProvider = NotifierProvider<ClimaNotifier, ClimaEstado>(() {
-  return ClimaNotifier();
+// 3. Exponemos el nuevo proveedor vinculado a este controlador de pantalla
+final pantallaClimaProvider = NotifierProvider<PantallaClimaController, PantallaClimaEstado>(() {
+  return PantallaClimaController();
 });

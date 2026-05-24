@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // Importamos Riverpod
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:app_clima_01/providers/clima_provider.dart'; // Importamos tu nuevo cerebro
+// IMPORTANTE: Ahora importamos el controlador de su propia carpeta de vista
+import 'package:app_clima_01/views/clima/pantalla_clima_controller.dart'; 
 import 'package:app_clima_01/views/clima/widgets/boton_emergencia.dart';
 import 'package:app_clima_01/views/global_widgets/menu_lateral.dart';
 import 'package:app_clima_01/views/clima/widgets/tarjeta_clima_principal.dart';
 import 'package:app_clima_01/views/clima/widgets/tarjeta_dia.dart';
 
-// CAMBIO CLAVE: Ahora es un ConsumerStatefulWidget para escuchar a Riverpod
 class PantallaClima extends ConsumerStatefulWidget {
   const PantallaClima({super.key});
 
@@ -20,15 +20,15 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
   @override
   void initState() {
     super.initState();
-    // Al arrancar, le decimos al proveedor que encienda el GPS y cargue las APIs
+    // Llamamos al nuevo controlador de la pantalla para iniciar el flujo
     Future.microtask(() {
-      ref.read(climaProvider.notifier).inicializarClima();
+      ref.read(pantallaClimaProvider.notifier).inicializarClima();
     });
   }
 
-  // Las funciones de navegación permanecen en la vista por diseño
   Future<void> _abrirGraficoDetallado() async {
-    final estado = ref.read(climaProvider); // Leemos las coordenadas del proveedor
+    // Leemos las coordenadas guardadas en el nuevo estado de la pantalla
+    final estado = ref.read(pantallaClimaProvider); 
     final String urlFormada = 'https://meteoblue.com{estado.latitudGuardada}&lon=${estado.longitudGuardada}';
     final Uri uri = Uri.parse(urlFormada);
     try {
@@ -49,8 +49,8 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
 
   @override
   Widget build(BuildContext context) {
-    // Escuchamos el estado del proveedor. Si algo cambia en el cerebro, la pantalla se redibuja sola.
-    final climaEstado = ref.watch(climaProvider);
+    // Escuchamos el nuevo proveedor específico de esta pantalla
+    final climaEstado = ref.watch(pantallaClimaProvider);
 
     return Scaffold(
       drawer: const MenuLateral(),
@@ -74,7 +74,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   
-                  // 1. CLIMA ACTUAL (LEÍDO DESDE EL PROVEEDOR)
+                  // 1. CLIMA ACTUAL (STACK DE BORDE A BORDE)
                   climaEstado.climaActual == null
                       ? const Padding(
                           padding: EdgeInsets.only(top: 150.0),
@@ -97,7 +97,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                           ],
                         ),
 
-                  // 2. CONTENIDO INFERIOR CON DATOS ENLAZADOS A RIVERPOD
+                  // 2. CONTENIDO INFERIOR CON DATOS ENLAZADOS AL CONTROLADOR
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 24.0),
                     child: Column(
@@ -131,7 +131,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
 
                         const SizedBox(height: 40),
 
-                        // Enlazamos tu BotonEmergencia a los datos del proveedor
+                        // Botones de Emergencia enlazados al nuevo estado
                         BotonEmergencia(
                           texto: "AVISOS METEOROLÓGICOS",
                           subtexto: climaEstado.subtextoAvisos,
@@ -142,7 +142,6 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
 
                         const SizedBox(height: 16),
 
-                        // Segundo botón enlazado a las Alertas Críticas del proveedor
                         BotonEmergencia(
                           texto: "ALERTAS CRÍTICAS",
                           subtexto: climaEstado.subtextoAlertas,
