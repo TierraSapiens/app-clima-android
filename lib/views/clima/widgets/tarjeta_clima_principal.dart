@@ -46,7 +46,7 @@ class TarjetaClimaPrincipal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // URL del icono a color que va superpuesto
-    final String urlIconoClima = 'https://openweathermap.org{respuesta.codigoIcono}@4x.png';
+    final String urlIconoClima = 'https://openweathermap.org/img/wn/${respuesta.codigoIcono}@4x.png';
     // Ruta de tu imagen de fondo local
     final String rutaFondo = _obtenerRutaFondo(respuesta.codigoIcono);
 
