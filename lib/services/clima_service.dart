@@ -17,8 +17,10 @@ class ClimaService {
     );
 
     try {
-      final resActual = await http.get(urlActual);
-      final resForecast = await http.get(urlForecast);
+      // Ejecutar las dos llamadas en paralelo para reducir tiempo total de espera
+      final responses = await Future.wait([http.get(urlActual), http.get(urlForecast)]);
+      final resActual = responses[0];
+      final resForecast = responses[1];
 
       if (resActual.statusCode == 200 && resForecast.statusCode == 200) {
         final datosActual = jsonDecode(resActual.body);
