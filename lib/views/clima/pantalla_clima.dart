@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:app_clima_01/config/app_theme.dart';
 import 'package:app_clima_01/views/clima/pantalla_clima_controller.dart';
 import 'package:app_clima_01/views/clima/widgets/boton_emergencia.dart';
-import 'package:app_clima_01/views/global_widgets/menu_lateral.dart';
+import 'package:app_clima_01/global_widgets/menu_lateral.dart';
 import 'package:app_clima_01/views/clima/widgets/tarjeta_clima_principal.dart';
 import 'package:app_clima_01/views/clima/widgets/tarjeta_dia.dart';
 
