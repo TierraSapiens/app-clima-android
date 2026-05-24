@@ -1,156 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Importamos Riverpod
 import 'package:url_launcher/url_launcher.dart';
-import 'package:app_clima_01/config/app_theme.dart';
-import 'package:app_clima_01/models/clima_model.dart';
-import 'package:app_clima_01/services/clima_service.dart';
+import 'package:app_clima_01/providers/clima_provider.dart'; // Importamos tu nuevo cerebro
 import 'package:app_clima_01/views/clima/widgets/boton_emergencia.dart';
 import 'package:app_clima_01/views/global_widgets/menu_lateral.dart';
 import 'package:app_clima_01/views/clima/widgets/tarjeta_clima_principal.dart';
 import 'package:app_clima_01/views/clima/widgets/tarjeta_dia.dart';
 
-class PantallaClima extends StatefulWidget {
+// CAMBIO CLAVE: Ahora es un ConsumerStatefulWidget para escuchar a Riverpod
+class PantallaClima extends ConsumerStatefulWidget {
   const PantallaClima({super.key});
 
   @override
-  State<PantallaClima> createState() => _PantallaClimaState();
+  ConsumerState<PantallaClima> createState() => _PantallaClimaState();
 }
 
-class _PantallaClimaState extends State<PantallaClima> {
-  final ClimaService _climaService = ClimaService();
-  String _localidadActual = "Buscando ubicación...";
-  String _estadoClimaActual = "Cargando datos del cielo...";
-
-  Color _colorFondoSuperior = AppTheme.backgroundGradientTop;
-  Color _colorFondoInferior = AppTheme.backgroundGradientBottom;
-
-  ClimaRespuesta? _climaActual;
-  List<ClimaDia> _pronosticoTresDias = [];
-
-  double _latitudGuardada = 0.0;
-  double _longitudGuardada = 0.0;
-
-  String _subtextoAvisos = "Nivel Verde: Sin advertencias";
-  String _subtextoAlertas = "Nivel Verde: Condiciones normales";
+class _PantallaClimaState extends ConsumerState<PantallaClima> {
   
-  Color _colorAvisosSMN = const Color(0xFF22C55E); 
-  Color _colorAlertasSMN = const Color(0xFF22C55E); 
-
-  IconData _iconoAvisos = Icons.check_circle_outline_rounded;
-  IconData _iconoAlertas = Icons.shield_outlined;
-
   @override
   void initState() {
     super.initState();
-    _calcularFondoPorEstacion();
-    _obtenerUbicacionActual();
+    // Al arrancar, le decimos al proveedor que encienda el GPS y cargue las APIs
+    Future.microtask(() {
+      ref.read(climaProvider.notifier).inicializarClima();
+    });
   }
 
-  void _calcularFondoPorEstacion() {
-    final ahora = DateTime.now();
-    final mes = ahora.month;
-    final dia = ahora.day;
-
-    if ((mes == 3 && dia >= 21) || mes == 4 || mes == 5 || (mes == 6 && dia < 21)) {
-      _colorFondoSuperior = AppTheme.backgroundSpringTop;
-      _colorFondoInferior = AppTheme.backgroundSpringBottom;
-    } else if ((mes == 6 && dia >= 21) || mes == 7 || mes == 8 || (mes == 9 && dia < 21)) {
-      _colorFondoSuperior = AppTheme.backgroundSummerTop;
-      _colorFondoInferior = AppTheme.backgroundSummerBottom;
-    } else if ((mes == 9 && dia >= 21) || mes == 10 || mes == 11 || (mes == 12 && dia < 21)) {
-      _colorFondoSuperior = AppTheme.backgroundAutumnTop;
-      _colorFondoInferior = AppTheme.backgroundAutumnBottom;
-    } else {
-      _colorFondoSuperior = AppTheme.backgroundWinterTop;
-      _colorFondoInferior = AppTheme.backgroundWinterBottom;
-    }
-  }
-
-  Future<void> _obtenerUbicacionActual() async {
-    bool servicioHabilitado = await Geolocator.isLocationServiceEnabled();
-    if (!servicioHabilitado) {
-      setState(() => _localidadActual = "GPS apagado");
-      return;
-    }
-
-    LocationPermission permiso = await Geolocator.checkPermission();
-    if (permiso == LocationPermission.denied) {
-      permiso = await Geolocator.requestPermission();
-      if (permiso == LocationPermission.denied) {
-        setState(() => _localidadActual = "Permiso denegado");
-        return;
-      }
-    }
-
-    try {
-      Position posicion = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
-      );
-
-      _latitudGuardada = posicion.latitude;
-      _longitudGuardada = posicion.longitude;
-
-      List<Placemark> marcas = await placemarkFromCoordinates(posicion.latitude, posicion.longitude);
-      if (marcas.isNotEmpty) {
-        Placemark lugar = marcas.first;
-        setState(() {
-          _localidadActual = lugar.locality ?? lugar.administrativeArea ?? "Desconocido";
-        });
-      }
-
-      await _obtenerDatosDeAmbasAPIs(posicion.latitude, posicion.longitude);
-    } catch (e) {
-      setState(() => _localidadActual = "Error al buscar");
-    }
-  }
-
-  Future<void> _obtenerDatosDeAmbasAPIs(double lat, double lon) async {
-    try {
-      final respuesta = await _climaService.obtenerDatosClima(lat, lon);
-      if (respuesta == null) {
-        setState(() => _estadoClimaActual = "No se pudieron cargar los datos");
-        return;
-      }
-
-      setState(() {
-        _climaActual = respuesta;
-        _pronosticoTresDias = respuesta.pronostico;
-
-        if (respuesta.nivelAlerta == 2) {
-          _colorAvisosSMN = const Color(0xFFF97316);
-          _subtextoAvisos = "Zonas afectadas por lluvias intensas";
-          _iconoAvisos = Icons.warning_amber_rounded;
-
-          _colorAlertasSMN = const Color(0xFFEF4444);
-          _subtextoAlertas = "Zonas críticas: Tormentas severas";
-          _iconoAlertas = Icons.gpp_bad_rounded;
-        } else if (respuesta.nivelAlerta == 1) {
-          _colorAvisosSMN = const Color(0xFFF97316);
-          _subtextoAvisos = "Zonas afectadas por chaparrones";
-          _iconoAvisos = Icons.warning_amber_rounded;
-
-          _colorAlertasSMN = const Color(0xFF22C55E);
-          _subtextoAlertas = "No hay Alertas";
-          _iconoAlertas = Icons.shield_outlined;
-        } else {
-          _colorAvisosSMN = const Color(0xFF22C55E);
-          _subtextoAvisos = "No hay avisos";
-          _iconoAvisos = Icons.check_circle_outline_rounded;
-
-          _colorAlertasSMN = const Color(0xFF22C55E);
-          _subtextoAlertas = "No hay Alertas";
-          _iconoAlertas = Icons.shield_outlined;
-        }
-      });
-    } catch (e) {
-      setState(() => _estadoClimaActual = "Error al sincronizar radares");
-    }
-  }
-
-
+  // Las funciones de navegación permanecen en la vista por diseño
   Future<void> _abrirGraficoDetallado() async {
-    final String urlFormada = 'https://www.meteoblue.com/es/tiempo/semana/index/index?lat=$_latitudGuardada&lon=$_longitudGuardada';
+    final estado = ref.read(climaProvider); // Leemos las coordenadas del proveedor
+    final String urlFormada = 'https://meteoblue.com{estado.latitudGuardada}&lon=${estado.longitudGuardada}';
     final Uri uri = Uri.parse(urlFormada);
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -160,7 +39,7 @@ class _PantallaClimaState extends State<PantallaClima> {
   }
 
   Future<void> _abrirAlertasSMN() async {
-    final Uri uri = Uri.parse('https://www.smn.gob.ar/alertas');
+    final Uri uri = Uri.parse('https://smn.gob.ar');
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
@@ -168,39 +47,11 @@ class _PantallaClimaState extends State<PantallaClima> {
     }
   }
 
-  Widget _buildCargandoClima() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 100.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            _localidadActual,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 20),
-          const CircularProgressIndicator(color: Colors.white),
-          const SizedBox(height: 20),
-          Text(
-            _estadoClimaActual,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.white70,
-              fontWeight: FontWeight.w400,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
- @override
+  @override
   Widget build(BuildContext context) {
+    // Escuchamos el estado del proveedor. Si algo cambia en el cerebro, la pantalla se redibuja sola.
+    final climaEstado = ref.watch(climaProvider);
+
     return Scaffold(
       drawer: const MenuLateral(),
       body: Builder(
@@ -212,7 +63,7 @@ class _PantallaClimaState extends State<PantallaClima> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [_colorFondoSuperior, _colorFondoInferior],
+                colors: [climaEstado.colorFondoSuperior, climaEstado.colorFondoInferior],
                 stops: const [0.0, 0.65],
               ),
             ),
@@ -223,17 +74,18 @@ class _PantallaClimaState extends State<PantallaClima> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   
-                  // 1. CLIMA ACTUAL (STACK DE BORDE A BORDE)
-                  _climaActual == null
-                      ? _buildCargandoClima()
+                  // 1. CLIMA ACTUAL (LEÍDO DESDE EL PROVEEDOR)
+                  climaEstado.climaActual == null
+                      ? const Padding(
+                          padding: EdgeInsets.only(top: 150.0),
+                          child: Center(child: CircularProgressIndicator(color: Colors.white)),
+                        )
                       : Stack(
                           children: [
-                            // La tarjeta toca los bordes y sube al techo perfectamente
                             TarjetaClimaPrincipal(
-                              localidad: _localidadActual,
-                              respuesta: _climaActual!,
+                              localidad: climaEstado.localidadActual,
+                              respuesta: climaEstado.climaActual!,
                             ),
-                            // Botón de menú flotando arriba a la izquierda sobre la imagen
                             Positioned(
                               top: MediaQuery.of(context).padding.top + 10,
                               left: 16,
@@ -245,7 +97,7 @@ class _PantallaClimaState extends State<PantallaClima> {
                           ],
                         ),
 
-                  // 2. CONTENIDO INFERIOR CON MÁRGENES Y RESPONSIVIDAD
+                  // 2. CONTENIDO INFERIOR CON DATOS ENLAZADOS A RIVERPOD
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 24.0),
                     child: Column(
@@ -254,14 +106,14 @@ class _PantallaClimaState extends State<PantallaClima> {
                       children: [
                         
                         // Fila de pronósticos con Scroll Horizontal
-                        _pronosticoTresDias.isEmpty
+                        climaEstado.pronosticoTresDias.isEmpty
                             ? const SizedBox()
                             : SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 physics: const BouncingScrollPhysics(),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
-                                  children: _pronosticoTresDias.map((dia) {
+                                  children: climaEstado.pronosticoTresDias.map((dia) {
                                     return Padding(
                                       padding: const EdgeInsets.only(right: 12.0),
                                       child: TarjetaDia(
@@ -279,23 +131,23 @@ class _PantallaClimaState extends State<PantallaClima> {
 
                         const SizedBox(height: 40),
 
-                        // AJUSTE CLAVE: Alimentamos tu BotonEmergencia con los parámetros requeridos
+                        // Enlazamos tu BotonEmergencia a los datos del proveedor
                         BotonEmergencia(
                           texto: "AVISOS METEOROLÓGICOS",
-                          subtexto: _subtextoAvisos,
-                          colorAccento: _colorAvisosSMN,
-                          icono: _iconoAvisos,
+                          subtexto: climaEstado.subtextoAvisos,
+                          colorAccento: climaEstado.colorAvisosSMN,
+                          icono: climaEstado.iconoAvisos,
                           onTap: _abrirAlertasSMN,
                         ),
 
                         const SizedBox(height: 16),
 
-                        // Invocamos un segundo botón para las Alertas Críticas usando el mismo Widget reutilizable
+                        // Segundo botón enlazado a las Alertas Críticas del proveedor
                         BotonEmergencia(
                           texto: "ALERTAS CRÍTICAS",
-                          subtexto: _subtextoAlertas,
-                          colorAccento: _colorAlertasSMN,
-                          icono: _iconoAlertas,
+                          subtexto: climaEstado.subtextoAlertas,
+                          colorAccento: climaEstado.colorAlertasSMN,
+                          icono: climaEstado.iconoAlertas,
                           onTap: _abrirAlertasSMN,
                         ),
                       ],
