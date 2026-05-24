@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-// IMPORTANTE: Ahora importamos el controlador de su propia carpeta de vista
-import 'package:app_clima_01/views/clima/pantalla_clima_controller.dart'; 
+import 'package:app_clima_01/config/app_theme.dart';
+import 'package:app_clima_01/views/clima/pantalla_clima_controller.dart';
 import 'package:app_clima_01/views/clima/widgets/boton_emergencia.dart';
 import 'package:app_clima_01/views/global_widgets/menu_lateral.dart';
 import 'package:app_clima_01/views/clima/widgets/tarjeta_clima_principal.dart';
@@ -16,20 +16,44 @@ class PantallaClima extends ConsumerStatefulWidget {
 }
 
 class _PantallaClimaState extends ConsumerState<PantallaClima> {
-  
+  Color _colorFondoSuperior = AppTheme.backgroundGradientTop;
+  Color _colorFondoInferior = AppTheme.backgroundGradientBottom;
+
   @override
   void initState() {
     super.initState();
-    // Llamamos al nuevo controlador de la pantalla para iniciar el flujo
-    Future.microtask(() {
-      ref.read(pantallaClimaProvider.notifier).inicializarClima();
+    _calcularFondoPorEstacion();
+    // Iniciamos la carga desde el provider después del primer frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(climaProvider.notifier).load();
     });
   }
 
+  void _calcularFondoPorEstacion() {
+    final ahora = DateTime.now();
+    final mes = ahora.month;
+    final dia = ahora.day;
+
+    if ((mes == 3 && dia >= 21) || mes == 4 || mes == 5 || (mes == 6 && dia < 21)) {
+      _colorFondoSuperior = AppTheme.backgroundSpringTop;
+      _colorFondoInferior = AppTheme.backgroundSpringBottom;
+    } else if ((mes == 6 && dia >= 21) || mes == 7 || mes == 8 || (mes == 9 && dia < 21)) {
+      _colorFondoSuperior = AppTheme.backgroundSummerTop;
+      _colorFondoInferior = AppTheme.backgroundSummerBottom;
+    } else if ((mes == 9 && dia >= 21) || mes == 10 || mes == 11 || (mes == 12 && dia < 21)) {
+      _colorFondoSuperior = AppTheme.backgroundAutumnTop;
+      _colorFondoInferior = AppTheme.backgroundAutumnBottom;
+    } else {
+      _colorFondoSuperior = AppTheme.backgroundWinterTop;
+      _colorFondoInferior = AppTheme.backgroundWinterBottom;
+    }
+  }
+
   Future<void> _abrirGraficoDetallado() async {
-    // Leemos las coordenadas guardadas en el nuevo estado de la pantalla
-    final estado = ref.read(pantallaClimaProvider); 
-    final String urlFormada = 'https://meteoblue.com{estado.latitudGuardada}&lon=${estado.longitudGuardada}';
+    final estado = ref.read(climaProvider);
+    final data = estado.value;
+    if (data == null) return;
+    final String urlFormada = 'https://www.meteoblue.com/es/tiempo/semana/index/index?lat=${data.lat}&lon=${data.lon}';
     final Uri uri = Uri.parse(urlFormada);
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -39,7 +63,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
   }
 
   Future<void> _abrirAlertasSMN() async {
-    final Uri uri = Uri.parse('https://smn.gob.ar');
+    final Uri uri = Uri.parse('https://www.smn.gob.ar/alertas');
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
@@ -49,8 +73,8 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
 
   @override
   Widget build(BuildContext context) {
-    // Escuchamos el nuevo proveedor específico de esta pantalla
-    final climaEstado = ref.watch(pantallaClimaProvider);
+    // Escuchamos el provider de la pantalla
+    final climaEstado = ref.watch(climaProvider);
 
     return Scaffold(
       drawer: const MenuLateral(),
@@ -63,7 +87,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [climaEstado.colorFondoSuperior, climaEstado.colorFondoInferior],
+                colors: [_colorFondoSuperior, _colorFondoInferior],
                 stops: const [0.0, 0.65],
               ),
             ),
@@ -75,27 +99,51 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                 children: [
                   
                   // 1. CLIMA ACTUAL (STACK DE BORDE A BORDE)
-                  climaEstado.climaActual == null
-                      ? const Padding(
-                          padding: EdgeInsets.only(top: 150.0),
-                          child: Center(child: CircularProgressIndicator(color: Colors.white)),
+                  climaEstado.isLoading
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 150.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Text('Buscando ubicación...', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w500)),
+                              SizedBox(height: 20),
+                              CircularProgressIndicator(color: Colors.white),
+                            ],
+                          ),
                         )
-                      : Stack(
-                          children: [
-                            TarjetaClimaPrincipal(
-                              localidad: climaEstado.localidadActual,
-                              respuesta: climaEstado.climaActual!,
-                            ),
-                            Positioned(
-                              top: MediaQuery.of(context).padding.top + 10,
-                              left: 16,
-                              child: IconButton(
-                                icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-                                onPressed: () => Scaffold.of(context).openDrawer(),
+                      : climaEstado.hasError || climaEstado.value == null
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 120.0),
+                              child: Column(
+                                children: [
+                                  const Icon(Icons.error_outline, color: Colors.white, size: 48),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    climaEstado.hasError ? climaEstado.error.toString() : 'No hay datos',
+                                    style: const TextStyle(color: Colors.white70),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
+                            )
+                          : Builder(builder: (_) {
+                              final data = climaEstado.value!;
+                              return Stack(
+                                children: [
+                                  TarjetaClimaPrincipal(
+                                    localidad: data.localidad,
+                                    respuesta: data.clima,
+                                  ),
+                                  Positioned(
+                                    top: MediaQuery.of(context).padding.top + 10,
+                                    left: 16,
+                                    child: IconButton(
+                                      icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                                      onPressed: () => Scaffold.of(context).openDrawer(),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
 
                   // 2. CONTENIDO INFERIOR CON DATOS ENLAZADOS AL CONTROLADOR
                   Padding(
@@ -106,14 +154,14 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                       children: [
                         
                         // Fila de pronósticos con Scroll Horizontal
-                        climaEstado.pronosticoTresDias.isEmpty
+                        (climaEstado.value?.clima.pronostico ?? []).isEmpty
                             ? const SizedBox()
                             : SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 physics: const BouncingScrollPhysics(),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
-                                  children: climaEstado.pronosticoTresDias.map((dia) {
+                                  children: (climaEstado.value!.clima.pronostico).map((dia) {
                                     return Padding(
                                       padding: const EdgeInsets.only(right: 12.0),
                                       child: TarjetaDia(
@@ -134,9 +182,9 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                         // Botones de Emergencia enlazados al nuevo estado
                         BotonEmergencia(
                           texto: "AVISOS METEOROLÓGICOS",
-                          subtexto: climaEstado.subtextoAvisos,
-                          colorAccento: climaEstado.colorAvisosSMN,
-                          icono: climaEstado.iconoAvisos,
+                          subtexto: climaEstado.value?.subtextoAvisos ?? 'No hay avisos',
+                          colorAccento: climaEstado.value?.colorAvisos ?? const Color(0xFF22C55E),
+                          icono: climaEstado.value?.iconoAvisos ?? Icons.check_circle_outline_rounded,
                           onTap: _abrirAlertasSMN,
                         ),
 
@@ -144,9 +192,9 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
 
                         BotonEmergencia(
                           texto: "ALERTAS CRÍTICAS",
-                          subtexto: climaEstado.subtextoAlertas,
-                          colorAccento: climaEstado.colorAlertasSMN,
-                          icono: climaEstado.iconoAlertas,
+                          subtexto: climaEstado.value?.subtextoAlertas ?? 'No hay alertas',
+                          colorAccento: climaEstado.value?.colorAlertas ?? const Color(0xFF22C55E),
+                          icono: climaEstado.value?.iconoAlertas ?? Icons.shield_outlined,
                           onTap: _abrirAlertasSMN,
                         ),
                       ],

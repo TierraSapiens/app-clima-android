@@ -18,13 +18,11 @@ class UbicacionService {
   /// Obtiene los permisos del GPS y retorna las coordenadas junto con la localidad.
   /// Si algo falla, lanza una excepción con el mensaje de error correspondiente.
   Future<UbicacionDatos> obtenerUbicacionActual() async {
-    // 1. Verificar si el servicio de GPS está encendido en el móvil
     bool servicioHabilitado = await Geolocator.isLocationServiceEnabled();
     if (!servicioHabilitado) {
       throw Exception("GPS apagado");
     }
 
-    // 2. Verificar los permisos de la aplicación
     LocationPermission permiso = await Geolocator.checkPermission();
     if (permiso == LocationPermission.denied) {
       permiso = await Geolocator.requestPermission();
@@ -38,19 +36,17 @@ class UbicacionService {
     }
 
     try {
-      // 3. Obtener la posición física actual
       Position posicion = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
       );
 
       String localidadDetectada = "Desconocido";
 
-      // 4. Traducir coordenadas a texto (Geocoding)
       List<Placemark> marcas = await placemarkFromCoordinates(
-        posicion.latitude, 
+        posicion.latitude,
         posicion.longitude,
       );
-      
+
       if (marcas.isNotEmpty) {
         Placemark lugar = marcas.first;
         localidadDetectada = lugar.locality ?? lugar.administrativeArea ?? "Desconocido";
