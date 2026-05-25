@@ -30,7 +30,9 @@ class ClimaViewData {
   });
 }
 
-final climaProvider = AsyncNotifierProvider<ClimaController, ClimaViewData?>(ClimaController.new);
+final climaProvider = AsyncNotifierProvider<ClimaController, ClimaViewData?>(
+  ClimaController.new,
+);
 
 class ClimaController extends AsyncNotifier<ClimaViewData?> {
   final ClimaService _climaService = ClimaService();
@@ -51,7 +53,10 @@ class ClimaController extends AsyncNotifier<ClimaViewData?> {
 
       final climaResp = await _climaService.obtenerDatosClima(lat, lon);
       if (climaResp == null) {
-        state = AsyncValue.error(Exception('No se pudieron cargar los datos'), StackTrace.current);
+        state = AsyncValue.error(
+          Exception('No se pudieron cargar los datos'),
+          StackTrace.current,
+        );
         return;
       }
 

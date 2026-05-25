@@ -6,11 +6,13 @@ class ClimaDia {
   final Color colorIcono;
   final String tempMaxMin;
   final String estado;
+  final String imagenAsset;
 
   ClimaDia({
     required this.fechaLabel,
     required this.icono,
     required this.colorIcono,
+    required this.imagenAsset,
     required this.tempMaxMin,
     required this.estado,
   });

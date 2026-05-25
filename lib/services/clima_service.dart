@@ -9,16 +9,18 @@ class ClimaService {
     const String apiKey = "d1f3d163ba58ae2e5fe2e027b312e550";
 
     final urlActual = Uri.parse(
-      'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=metric&lang=es'
+      'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=metric&lang=es',
     );
 
     final urlForecast = Uri.parse(
-      'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4'
+      'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4',
     );
 
     try {
-      // Ejecutar las dos llamadas en paralelo para reducir tiempo total de espera
-      final responses = await Future.wait([http.get(urlActual), http.get(urlForecast)]);
+      final responses = await Future.wait([
+        http.get(urlActual),
+        http.get(urlForecast),
+      ]);
       final resActual = responses[0];
       final resForecast = responses[1];
 
@@ -28,8 +30,10 @@ class ClimaService {
         final datosDiarios = datosMeteo['daily'];
 
         final int temperaturaActual = datosActual['main']['temp'].round();
-        final int sensacionTermicaActual = datosActual['main']['feels_like'].round();
-        final String descripcionActual = datosActual['weather'][0]['description'];
+        final int sensacionTermicaActual = datosActual['main']['feels_like']
+            .round();
+        final String descripcionActual =
+            datosActual['weather'][0]['description'];
         final String estadoActual = capitalizarPrimeraLetra(descripcionActual);
         final String codigoIconoActual = datosActual['weather'][0]['icon'];
         final String climaPrincipal = datosActual['weather'][0]['main'];
@@ -52,7 +56,10 @@ class ClimaService {
 
           int codigoWMO = datosDiarios['weather_code'][i];
 
-          if (codigoWMO == 96 || codigoWMO == 99 || codigoWMO == 65 || codigoWMO == 82) {
+          if (codigoWMO == 96 ||
+              codigoWMO == 99 ||
+              codigoWMO == 65 ||
+              codigoWMO == 82) {
             if (nivelMaximoAlerta < 2) nivelMaximoAlerta = 2;
           } else if (codigoWMO == 95 || codigoWMO == 63 || codigoWMO == 81) {
             if (nivelMaximoAlerta < 1) nivelMaximoAlerta = 1;
@@ -65,6 +72,7 @@ class ClimaService {
               fechaLabel: labelCompleto,
               icono: traduccion['icono'],
               colorIcono: traduccion['color'],
+              imagenAsset: obtenerRutaImagenPorWMO(codigoWMO),
               tempMaxMin: "$max / $min",
               estado: traduccion['texto'],
             ),

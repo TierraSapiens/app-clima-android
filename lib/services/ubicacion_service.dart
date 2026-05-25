@@ -15,8 +15,6 @@ class UbicacionDatos {
 }
 
 class UbicacionService {
-  /// Obtiene los permisos del GPS y retorna las coordenadas junto con la localidad.
-  /// Si algo falla, lanza una excepción con el mensaje de error correspondiente.
   Future<UbicacionDatos> obtenerUbicacionActual() async {
     bool servicioHabilitado = await Geolocator.isLocationServiceEnabled();
     if (!servicioHabilitado) {
@@ -37,7 +35,9 @@ class UbicacionService {
 
     try {
       Position posicion = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+        ),
       );
 
       String localidadDetectada = "Desconocido";
@@ -49,7 +49,8 @@ class UbicacionService {
 
       if (marcas.isNotEmpty) {
         Placemark lugar = marcas.first;
-        localidadDetectada = lugar.locality ?? lugar.administrativeArea ?? "Desconocido";
+        localidadDetectada =
+            lugar.locality ?? lugar.administrativeArea ?? "Desconocido";
       }
 
       return UbicacionDatos(

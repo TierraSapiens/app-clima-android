@@ -1,4 +1,3 @@
-//Logica de los Botones de Alertas y Avisos
 import 'package:flutter/material.dart';
 import 'package:app_clima_01/config/app_theme.dart';
 
@@ -43,11 +42,18 @@ class BotonEmergencia extends StatelessWidget {
                     style: AppTheme.buttonTitle.copyWith(color: colorAccento),
                   ),
                   const SizedBox(height: 2),
-                  Text(subtexto, style: const TextStyle(fontSize: 12, color: Colors.white38)),
+                  Text(
+                    subtexto,
+                    style: const TextStyle(fontSize: 12, color: Colors.white38),
+                  ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white12, size: 14),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Colors.white12,
+              size: 14,
+            ),
           ],
         ),
       ),

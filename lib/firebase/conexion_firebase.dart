@@ -8,14 +8,12 @@ class ServiceFirebase {
       await Firebase.initializeApp();
 
       FirebaseMessaging messaging = FirebaseMessaging.instance;
-      await messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+      await messaging.requestPermission(alert: true, badge: true, sound: true);
 
       await messaging.subscribeToTopic('alerta_mardelplata');
-      debugPrint('📡 MeteoMarti sintonizó con éxito el canal: alerta_mardelplata');
+      debugPrint(
+        '📡 MeteoMarti sintonizó con éxito el canal: alerta_mardelplata',
+      );
     } catch (e) {
       debugPrint('❌ Error al encender Firebase: $e');
     }

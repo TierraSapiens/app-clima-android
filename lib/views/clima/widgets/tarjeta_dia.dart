@@ -3,8 +3,8 @@ import 'package:app_clima_01/config/app_theme.dart';
 
 class TarjetaDia extends StatelessWidget {
   final String dia;
-  final IconData icono;
-  final Color colorIcono; // 💡 NUEVO: Recibe el color dinámico del clima (Sol/Luna/Nube)
+  final String imagenAsset;
+  final Color colorIcono;
   final String temp;
   final String estado;
   final VoidCallback onTap;
@@ -12,32 +12,30 @@ class TarjetaDia extends StatelessWidget {
   const TarjetaDia({
     super.key,
     required this.dia,
-    required this.icono,
-    required this.colorIcono, // Se vuelve obligatorio para dar vida a la tarjeta
+    required this.imagenAsset,
+    required this.colorIcono,
     required this.temp,
     required this.estado,
     required this.onTap,
   });
-    @override
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: IntrinsicWidth(
         child: Container(
-          height: 145, 
+          height: 145,
           margin: const EdgeInsets.only(right: 14),
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
           decoration: BoxDecoration(
-            color: const Color(0xFF161618), 
-            borderRadius: BorderRadius.circular(20), 
+            color: const Color(0xFF161618),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              // CORREGIDO: Agregamos la coma al final y usamos withValues para tu Flutter moderno
               color: Colors.white.withValues(alpha: 0.06),
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                // CORREGIDO: Agregamos la coma al final y usamos withValues
                 color: Colors.black.withValues(alpha: 0.15),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
@@ -48,18 +46,22 @@ class TarjetaDia extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                dia.toUpperCase(), // Se ve más estético y tipo "UI de clima" en mayúsculas
+                dia.toUpperCase(),
                 style: AppTheme.forecastLabel.copyWith(
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: 10),
-              // ✨ MEJORA: El icono ahora usa el color dinámico que le pasas, no siempre celeste
-              Icon(icono, color: colorIcono, size: 32), 
+              Image.asset(
+                imagenAsset,
+                width: 32,
+                height: 32,
+                fit: BoxFit.contain,
+              ),
               const SizedBox(height: 10),
               Text(
-                temp, 
+                temp,
                 style: AppTheme.forecastTemp.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
@@ -68,9 +70,8 @@ class TarjetaDia extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 estado,
-                // ✨ MEJORA: Aseguramos que el texto descriptivo sea legible forzando un gris claro directo si es necesario
                 style: AppTheme.forecastStatus.copyWith(
-                  color: Colors.white60, 
+                  color: Colors.white60,
                   fontSize: 11,
                 ),
                 textAlign: TextAlign.center,

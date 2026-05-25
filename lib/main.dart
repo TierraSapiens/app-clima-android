@@ -8,9 +8,6 @@ import 'package:app_clima_01/views/clima/pantalla_clima.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es_AR', null);
-
-  // Arrancamos la app inmediatamente y hacemos la inicialización pesada
-  // (Firebase) desde una pantalla de carga para no bloquear el primer fotograma.
   runApp(const ProviderScope(child: MiAppDeClima()));
 }
 
