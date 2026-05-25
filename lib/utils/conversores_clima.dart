@@ -109,29 +109,39 @@ String formatearLabelPronostico(DateTime fecha) {
 }
 
 String capitalizarPrimeraLetra(String texto) {
-  if (texto.isEmpty) return texto;
+  if (texto.isEmpty) {
+    return texto;
+  }
   return texto[0].toUpperCase() + texto.substring(1);
 }
 
 String obtenerRutaImagenPorWMO(int codigoWMO) {
-  if (codigoWMO == 0) return 'assets/clima/cielo_dia_despejado.png';
-  if (codigoWMO >= 1 && codigoWMO <= 3)
+  if (codigoWMO == 0) {
+    return 'assets/clima/cielo_dia_despejado.png';
+  }
+  if (codigoWMO >= 1 && codigoWMO <= 3) {
     return 'assets/clima/cielo_dia_nubes_dispersas.png';
-  if (codigoWMO >= 51 && codigoWMO <= 55)
+  }
+  if (codigoWMO >= 51 && codigoWMO <= 55) {
     return 'assets/clima/cielo_dia_Llovizna.png';
-  if (codigoWMO >= 56 && codigoWMO <= 67)
+  }
+  if (codigoWMO >= 56 && codigoWMO <= 67) {
     return 'assets/clima/cielo_dia_lluvia.png';
+  }
   if ((codigoWMO >= 61 && codigoWMO <= 67) ||
-      (codigoWMO >= 80 && codigoWMO <= 82))
+      (codigoWMO >= 80 && codigoWMO <= 82)) {
     return 'assets/clima/cielo_dia_lluvia.png';
-  if (codigoWMO >= 95 && codigoWMO <= 99)
+  }
+  if (codigoWMO >= 95 && codigoWMO <= 99) {
     return 'assets/clima/cielo_dia_tormenta_electrica.png';
+  }
   if (codigoWMO == 71 ||
       codigoWMO == 73 ||
       codigoWMO == 75 ||
       codigoWMO == 77 ||
       codigoWMO == 85 ||
-      codigoWMO == 86)
+      codigoWMO == 86) {
     return 'assets/clima/cielo_dia_nublado.png';
+  }
   return 'assets/clima/cielo_dia_nublado.png';
 }

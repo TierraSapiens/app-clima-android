@@ -12,20 +12,24 @@ class WeatherBackground extends StatelessWidget {
 
   String _obtenerRutaImagen(String codigo) {
     if (codigo.endsWith('n')) {
-      if (codigo.startsWith('01'))
+      if (codigo.startsWith('01')) {
         return 'assets/images/cielo_noche_despejado.jpg';
+      }
       if (codigo.startsWith('02') ||
           codigo.startsWith('03') ||
-          codigo.startsWith('04'))
+          codigo.startsWith('04')) {
         return 'assets/images/cielo_noche_nublado.jpg';
+      }
       return 'assets/images/cielo_noche_lluvia.jpg';
     } else {
-      if (codigo.startsWith('01'))
+      if (codigo.startsWith('01')) {
         return 'assets/images/cielo_dia_despejado.jpg';
+      }
       if (codigo.startsWith('02') ||
           codigo.startsWith('03') ||
-          codigo.startsWith('04'))
+          codigo.startsWith('04')) {
         return 'assets/images/cielo_dia_nublado.jpg';
+      }
       return 'assets/images/cielo_dia_lluvia.jpg';
     }
   }
