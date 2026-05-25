@@ -111,9 +111,9 @@ class TarjetaClimaPrincipal extends StatelessWidget {
                 Text(
                   '${respuesta.temperatura}°',
                   style: const TextStyle(
-                    fontSize: 85, 
-                    fontWeight: FontWeight.w600, 
-                    letterSpacing: -4, 
+                    fontSize: 110, 
+                    fontWeight: FontWeight.w100, // Fuente temperatura principal
+                    letterSpacing: -8, 
                     height: 1.0, 
                     color: Colors.white,
                     shadows: [

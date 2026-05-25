@@ -33,6 +33,49 @@ IconData obtenerIconoPorCodigo(String codigoIconoApi) {
   return codigoIconoApi.endsWith('n') ? Icons.nightlight_round : Icons.wb_sunny;
 }
 
+String obtenerRutaImagenClima(String codigoApi) {
+  switch (codigoApi) {
+    case '01d':
+      return 'assets/clima/cielo_dia_despejado.png';
+    case '01n':
+      return 'assets/clima/cielo_noche_despejado.png';
+    case '02d':
+      return 'assets/clima/cielo_dia_nubes_dispersas.png';
+    case '02n':
+      return 'assets/clima/cielo_noche_nubes_dispersas.png';
+    case '03d':
+      return 'assets/clima/cielo_dia_nublado_leve.png';
+    case '03n':
+      return 'assets/clima/cielo_noche_nublado_leve.png';
+    case '04d':
+      return 'assets/clima/cielo_dia_nublado.png';
+    case '04n':
+      return 'assets/clima/cielo_noche_nublado.png';
+    case '09d':
+      return 'assets/clima/cielo_dia_lluvia.png';
+    case '09n':
+      return 'assets/clima/cielo_noche_lluvia.png';
+    case '10d':
+      return 'assets/clima/cielo_dia_lluvia.png';
+    case '10n':
+      return 'assets/clima/cielo_noche_lluvia.png';
+    case '11d':
+      return 'assets/clima/cielo_dia_tormenta_electrica.png';
+    case '11n':
+      return 'assets/clima/cielo_noche_tormenta_electrica.png';
+    case '13d':
+      return 'assets/clima/cielo_dia_nublado.png';
+    case '13n':
+      return 'assets/clima/cielo_noche_nublado.png';
+    case '50d':
+      return 'assets/clima/cielo_dia_nublado.png';
+    case '50n':
+      return 'assets/clima/cielo_noche_nublado.png';
+    default:
+      return 'assets/clima/cielo_dia_nublado.png';
+  }
+}
+
 String formatearLabelPronostico(DateTime fecha) {
   final diaSemana = DateFormat('EEE', 'es_AR').format(fecha).toUpperCase().replaceAll('.', '');
   final diaMes = DateFormat('dd/MM').format(fecha);
