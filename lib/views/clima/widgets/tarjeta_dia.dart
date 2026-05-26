@@ -55,8 +55,8 @@ class TarjetaDia extends StatelessWidget {
               const SizedBox(height: 10),
               Image.asset(
                 imagenAsset,
-                width: 32,
-                height: 32,
+                width: 55, //Tamaño icon pronostico
+                height: 55,
                 fit: BoxFit.contain,
               ),
               const SizedBox(height: 10),

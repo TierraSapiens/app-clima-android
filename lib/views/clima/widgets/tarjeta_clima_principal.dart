@@ -13,65 +13,28 @@ class TarjetaClimaPrincipal extends StatelessWidget {
     required this.respuesta,
   });
 
-  String _obtenerRutaFondo(String codigoIcono) {
-    switch (codigoIcono) {
-      case '01d':
-        return 'assets/images/cielo_dia_despejado.jpg';
-      case '01n':
-        return 'assets/images/cielo_noche_despejado.jpg';
-      case '02d':
-      case '03d':
-      case '04d':
-        return 'assets/images/cielo_dia_nublado.jpg';
-      case '02n':
-      case '03n':
-      case '04n':
-        return 'assets/images/cielo_noche_nublado.jpg';
-      case '09d':
-      case '10d':
-      case '11d':
-        return 'assets/images/cielo_dia_lluvia.jpg';
-      case '09n':
-      case '10n':
-      case '11n':
-        return 'assets/images/cielo_noche_lluvia.jpg';
-      default:
-        return codigoIcono.endsWith('d')
-            ? 'assets/images/cielo_dia_despejado.jpg'
-            : 'assets/images/cielo_noche_despejado.jpg';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final String rutaFondo = _obtenerRutaFondo(respuesta.codigoIcono);
-
     return Container(
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
-        image: DecorationImage(
-          image: AssetImage(rutaFondo),
-          fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-            Colors.black.withValues(alpha: 0.35),
-            BlendMode.srcOver,
-          ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            respuesta.colorIconoActual.withValues(alpha: 0.2), 
+            Colors.transparent,
+          ],
         ),
       ),
-      padding: const EdgeInsets.only(
-        top: 40.0,
-        bottom: 32.0,
-        left: 16.0,
-        right: 16.0,
-      ),
+      constraints: const BoxConstraints(minHeight: 380), // 👈 Le da un piso de altura para que respire
+      padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 24.0), // 👈 Subí el padding de abajo de 12 a 24
       child: SafeArea(
         bottom: false,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center, // 👈 Centra todo el bloque verticalmente
           children: [
+            const SizedBox(height: 20), // 👈 Le da un respiro inicial respecto al borde superior
             Text(
               localidad,
               style: AppTheme.title.copyWith(
@@ -87,16 +50,18 @@ class TarjetaClimaPrincipal extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.asset(
-                  obtenerRutaImagenClima(respuesta.codigoIcono),
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.contain,
+                ClipOval(
+                  child: Image.asset(
+                    obtenerRutaImagenClima(respuesta.codigoIcono),
+                    width: 180,  //Tamaño Icono Clima Principal
+                    height: 180,
+                    fit: BoxFit.contain,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Text(
@@ -105,7 +70,7 @@ class TarjetaClimaPrincipal extends StatelessWidget {
                     fontSize: 110,
                     fontWeight: FontWeight.w100,
                     letterSpacing: -8,
-                    height: 1.0,
+                    height: 0.85,
                     color: Colors.white,
                     shadows: [
                       Shadow(
@@ -118,7 +83,7 @@ class TarjetaClimaPrincipal extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             Text(
               '${respuesta.estado}  •  Sensación térmica ${respuesta.sensacionTermica}°',
               style: AppTheme.subtitle.copyWith(
