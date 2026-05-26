@@ -58,8 +58,8 @@ class TarjetaClimaPrincipal extends StatelessWidget {
                 ClipOval(
                   child: Image.asset(
                     obtenerRutaImagenClima(respuesta.codigoIcono),
-                    width: 180,  //Tamaño Icono Clima Principal
-                    height: 180,
+                    width: 140,  //Tamaño Icono Clima Principal
+                    height: 140,
                     fit: BoxFit.contain,
                   ),
                 ),

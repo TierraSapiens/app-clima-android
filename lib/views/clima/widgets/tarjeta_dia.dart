@@ -24,9 +24,9 @@ class TarjetaDia extends StatelessWidget {
       onTap: onTap,
       child: IntrinsicWidth(
         child: Container(
-          height: 145,
+          // height: 145,
           margin: const EdgeInsets.only(right: 14),
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
           decoration: BoxDecoration(
             color: const Color(0xFF161618),
             borderRadius: BorderRadius.circular(20),

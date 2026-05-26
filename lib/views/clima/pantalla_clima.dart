@@ -92,20 +92,24 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
           final climaData = climaEstado.value;
           final codigoIcono = climaData?.clima.codigoIcono ?? '01d'; 
 
+          // 1. El WeatherBackground va abajo de todo para pintar las nubes reales
           return WeatherBackground(
             codigoIconoApi: codigoIcono,
             child: Container(
               width: double.infinity,
               height: double.infinity,
+              // 2. Controlamos el degradé con transparencia absoluta (.withValues)
+              // para que funcione como un filtro de color y NO tape la foto de fondo
               decoration: BoxDecoration(
+                // ✏️ REEMPLÁZALO POR ESTE:
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    _colorFondoSuperior.withValues(alpha: 0.2), 
-                    _colorFondoInferior.withValues(alpha: 0.8),
+                    _colorFondoSuperior.withValues(alpha: 0.15),  // 👈 Filtro sutil con el color de la estación arriba
+                    _colorFondoInferior.withValues(alpha: 0.75),  // 👈 Oscuro abajo para que resalten los botones
                   ],
-                  stops: const [0.0, 0.65],
+                  stops: const [0.0, 0.7],
                 ),
               ),
               child: SingleChildScrollView(
@@ -154,53 +158,39 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                             ),
                           )
                         : Builder(
-                          builder: (_) {
-                            final data = climaEstado.value!;
-                            return Stack(
-                              children: [
-                                // 1. Bajamos todo el bloque del clima principal
-                                Positioned(
-                                  top: MediaQuery.of(context).padding.top + 60, // 👈 Más aire arriba
-                                  left: 0,
-                                  right: 0,
-                                  child: Column( // Usamos columna para separar elementos
-                                    children: [
-                                      // 2. Ciudad y Menú en la misma línea (como en el render)
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              data.localidad,
-                                              style: TextStyle( // Texto de ciudad más prominente
-                                                color: Colors.white,
-                                                fontSize: 28,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-                                              onPressed: () => Scaffold.of(context).openDrawer(),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 60), // 👈 GRAN ESPACIO entre ciudad y clima
-
-                                      // 3. El bloque de clima propiamente dicho
-                                      TarjetaClimaPrincipal(
-                                        localidad: '', // Dejamos la localidad vacía aquí
-                                        respuesta: data.clima,
-                                      ),
-                                    ],
+                            builder: (_) {
+                              final data = climaEstado.value!;
+                              return Stack(
+                                children: [
+                                  // La tarjeta dibuja la ciudad centrada y el clima arriba como en Movil 3
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                      top: MediaQuery.of(context).padding.top + 15,
+                                    ),
+                                    child: TarjetaClimaPrincipal(
+                                      localidad: data.localidad,
+                                      respuesta: data.clima,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                    const SizedBox(height: 8),
+                                  // El menú hamburguesa clavado arriba a la izquierda
+                                  Positioned(
+                                    top: MediaQuery.of(context).padding.top + 10,
+                                    left: 16,
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.menu,
+                                        color: Colors.white,
+                                        size: 28,
+                                      ),
+                                      onPressed: () =>
+                                          Scaffold.of(context).openDrawer(),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                    const SizedBox(height: 14), // Espaciado perfecto con el pronóstico semanal
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         vertical: 12.0,
@@ -277,4 +267,4 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
       ),
     );
   }
-} // Fin de la clase
+}
