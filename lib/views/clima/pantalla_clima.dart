@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:app_clima_01/config/app_theme.dart';
 import 'package:app_clima_01/views/clima/pantalla_clima_controller.dart';
 import 'package:app_clima_01/views/clima/widgets/boton_emergencia.dart';
 import 'package:app_clima_01/global_widgets/menu_lateral.dart';
@@ -17,45 +16,14 @@ class PantallaClima extends ConsumerStatefulWidget {
 }
 
 class _PantallaClimaState extends ConsumerState<PantallaClima> {
-  Color _colorFondoSuperior = AppTheme.backgroundGradientTop;
-  Color _colorFondoInferior = AppTheme.backgroundGradientBottom;
 
   @override
   void initState() {
     super.initState();
-    _calcularFondoPorEstacion();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(climaProvider.notifier).load();
     });
-  }
-
-  void _calcularFondoPorEstacion() {
-    final ahora = DateTime.now();
-    final mes = ahora.month;
-    final dia = ahora.day;
-
-    if ((mes == 3 && dia >= 21) ||
-        mes == 4 ||
-        mes == 5 ||
-        (mes == 6 && dia < 21)) {
-      _colorFondoSuperior = AppTheme.backgroundSpringTop;
-      _colorFondoInferior = AppTheme.backgroundSpringBottom;
-    } else if ((mes == 6 && dia >= 21) ||
-        mes == 7 ||
-        mes == 8 ||
-        (mes == 9 && dia < 21)) {
-      _colorFondoSuperior = AppTheme.backgroundSummerTop;
-      _colorFondoInferior = AppTheme.backgroundSummerBottom;
-    } else if ((mes == 9 && dia >= 21) ||
-        mes == 10 ||
-        mes == 11 ||
-        (mes == 12 && dia < 21)) {
-      _colorFondoSuperior = AppTheme.backgroundAutumnTop;
-      _colorFondoInferior = AppTheme.backgroundAutumnBottom;
-    } else {
-      _colorFondoSuperior = AppTheme.backgroundWinterTop;
-      _colorFondoInferior = AppTheme.backgroundWinterBottom;
-    }
   }
 
   Future<void> _abrirGraficoDetallado() async {
@@ -95,23 +63,9 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
           // 1. El WeatherBackground va abajo de todo para pintar las nubes reales
           return WeatherBackground(
             codigoIconoApi: codigoIcono,
-            child: Container(
+            child: SizedBox(
               width: double.infinity,
               height: double.infinity,
-              // 2. Controlamos el degradé con transparencia absoluta (.withValues)
-              // para que funcione como un filtro de color y NO tape la foto de fondo
-              decoration: BoxDecoration(
-                // ✏️ REEMPLÁZALO POR ESTE:
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    _colorFondoSuperior.withValues(alpha: 0.15),  // 👈 Filtro sutil con el color de la estación arriba
-                    _colorFondoInferior.withValues(alpha: 0.75),  // 👈 Oscuro abajo para que resalten los botones
-                  ],
-                  stops: const [0.0, 0.7],
-                ),
-              ),
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Column(

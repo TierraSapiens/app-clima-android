@@ -17,12 +17,11 @@ class TarjetaClimaPrincipal extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            respuesta.colorIconoActual.withValues(alpha: 0.2), 
+            respuesta.colorIconoActual.withValues(alpha: 0.2),
             Colors.transparent,
           ],
         ),
