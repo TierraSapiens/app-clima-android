@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart'; // <-- La nueva librería nativa
 
 class PantallaAlertas extends StatefulWidget {
   const PantallaAlertas({super.key});
@@ -9,68 +9,25 @@ class PantallaAlertas extends StatefulWidget {
 }
 
 class _PantallaAlertasState extends State<PantallaAlertas> {
-  late final WebViewController _controller;
-  bool _isLoading = true; // Para mostrar una carga prolija mientras descarga el mapa
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (String url) {
-            // 1. Inyectamos el código para limpiar la interfaz del SMN
-            _controller.runJavaScript('''
-              (function() {
-                var style = document.createElement('style');
-                style.type = 'text/css';
-                style.innerHTML = `
-                  .jumbotron, .pane-jumbotron, 
-                  .pane-smn-alertas-smn-alertas-menu, 
-                  #launch, #updatedTime { display: none !important; }
-                  
-                  .main-container, .row, .container, .inside { 
-                    width: 100% !important; 
-                    max-width: 100% !important; 
-                    padding: 0 !important; 
-                    margin: 0 !important; 
-                  }
-                  #mapa { height: 100vh !important; min-height: 100vh !important; }
-                `;
-                document.head.appendChild(style);
-              })();
-            ''');
-            
-            // 2. Apagamos el indicador de carga
-            setState(() {
-              _isLoading = false;
-            });
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse('https://www.smn.gob.ar/alertas'));
-  }
+  // Coordenadas para que el mapa abra centrado justo en Argentina
+  static const CameraPosition _puntoCentralArgentina = CameraPosition(
+    target: LatLng(-40.000000, -64.000000), 
+    zoom: 4.2, // Zoom ideal para ver el territorio completo en la pantalla
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Alertas Tempranas SMN'),
-        // Podés usar el color de tu app_theme aquí si lo preferís
-        backgroundColor: Colors.blueAccent, 
+        title: const Text('Sistema de Alertas'),
+        backgroundColor: const Color(0xFF1A237E), // Un azul oscuro bien prolijo
       ),
-      body: Stack(
-        children: [
-          // El mapa web funcional
-          WebViewWidget(controller: _controller),
-          
-          // Pantalla de carga mientras se procesa el mapa
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
-        ],
+      body: const GoogleMap(
+        initialCameraPosition: _puntoCentralArgentina,
+        mapType: MapType.normal,
+        myLocationEnabled: true,       // Muestra el puntito azul de la ubicación del usuario
+        myLocationButtonEnabled: true, // Habilita el botón nativo para centrar en tu ubicación
+        zoomControlsEnabled: false,    // Desactivamos los botones [+] y [-] para que quede limpio y moderno
       ),
     );
   }
