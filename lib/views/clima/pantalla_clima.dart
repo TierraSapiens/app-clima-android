@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:app_clima_01/views/clima/pantalla_alertas.dart';
+import 'package:app_clima_01/views/clima/pantalla_avisos.dart';
 import 'package:app_clima_01/views/clima/pantalla_clima_controller.dart';
 import 'package:app_clima_01/views/clima/widgets/boton_emergencia.dart';
 import 'package:app_clima_01/global_widgets/menu_lateral.dart';
@@ -186,10 +187,11 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                 climaEstado.value?.iconoAvisos ??
                                 Icons.check_circle_outline_rounded,
                             onTap: () {
+                              // 🔥 CAMBIADO: Ahora va a la pantalla de avisos independiente
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const PantallaAlertas(),
+                                  builder: (context) => const PantallaAvisos(),
                                 ),
                               );
                             },
@@ -207,6 +209,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                 climaEstado.value?.iconoAlertas ??
                                 Icons.shield_outlined,
                             onTap: () {
+                              // ✅ SE MANTIENE: Va al nuevo mapa nativo de Google
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
