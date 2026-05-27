@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:app_clima_01/views/clima/pantalla_alertas.dart';
 import 'package:app_clima_01/views/clima/pantalla_clima_controller.dart';
 import 'package:app_clima_01/views/clima/widgets/boton_emergencia.dart';
 import 'package:app_clima_01/global_widgets/menu_lateral.dart';
@@ -37,15 +38,6 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       debugPrint("Error al abrir navegador: $e");
-    }
-  }
-
-  Future<void> _abrirAlertasSMN() async {
-    final Uri uri = Uri.parse('https://www.smn.gob.ar/alertas');
-    try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (e) {
-      debugPrint("Error al abrir alertas SMN: $e");
     }
   }
 
@@ -193,7 +185,14 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                             icono:
                                 climaEstado.value?.iconoAvisos ??
                                 Icons.check_circle_outline_rounded,
-                            onTap: _abrirAlertasSMN,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const PantallaAlertas(),
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 16),
                           BotonEmergencia(
@@ -207,7 +206,14 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                             icono:
                                 climaEstado.value?.iconoAlertas ??
                                 Icons.shield_outlined,
-                            onTap: _abrirAlertasSMN,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const PantallaAlertas(),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),

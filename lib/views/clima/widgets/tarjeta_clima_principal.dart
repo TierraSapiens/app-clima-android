@@ -16,24 +16,14 @@ class TarjetaClimaPrincipal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            respuesta.colorIconoActual.withValues(alpha: 0.2),
-            Colors.transparent,
-          ],
-        ),
-      ),
-      constraints: const BoxConstraints(minHeight: 380), // 👈 Le da un piso de altura para que respire
-      padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 24.0), // 👈 Subí el padding de abajo de 12 a 24
+      constraints: const BoxConstraints(minHeight: 380),
+      padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 24.0),
       child: SafeArea(
         bottom: false,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // 👈 Centra todo el bloque verticalmente
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 20), // 👈 Le da un respiro inicial respecto al borde superior
+            const SizedBox(height: 20),
             Text(
               localidad,
               style: AppTheme.title.copyWith(
@@ -54,13 +44,11 @@ class TarjetaClimaPrincipal extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                ClipOval(
-                  child: Image.asset(
-                    obtenerRutaImagenClima(respuesta.codigoIcono),
-                    width: 140,  //Tamaño Icono Clima Principal
-                    height: 140,
-                    fit: BoxFit.contain,
-                  ),
+                Image.asset(
+                  obtenerRutaImagenClima(respuesta.codigoIcono),
+                  width: 140,
+                  height: 140,
+                  fit: BoxFit.contain,
                 ),
                 const SizedBox(width: 10),
                 Text(
