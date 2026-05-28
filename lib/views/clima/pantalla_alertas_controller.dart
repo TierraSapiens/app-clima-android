@@ -1,69 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:flutter_map/flutter_map.dart';
 
 class PantallaAlertasController extends ChangeNotifier {
-  int _diaSeleccionado = 1;
+  int _diaSeleccionado = 1; // 1 = Lunes/Hoy, 2 = Martes, 3 = Miércoles
   int get diaSeleccionado => _diaSeleccionado;
 
-  final List<Polygon> _poligonos = [];
-  List<Polygon> get poligonos => _poligonos;
+  String _urlCapaSmn = '';
+  String get urlCapaSmn => _urlCapaSmn;
 
   PantallaAlertasController() {
-    _generarPoligonosDePrueba();
+    _definirCapaSmn();
   }
 
   void cambiarDia(int nuevoDia) {
     _diaSeleccionado = nuevoDia;
-    _generarPoligonosDePrueba();
-    notifyListeners();
+    _definirCapaSmn(); 
+    notifyListeners();  
   }
 
-  void _generarPoligonosDePrueba() {
-    _poligonos.clear();
-
-    Color colorZonaCentro;
-    Color colorZonaSur;
-
+  void _definirCapaSmn() {
     if (_diaSeleccionado == 1) {
-      colorZonaCentro = Colors.amber;       // Alerta Amarilla
-      colorZonaSur = Colors.green;          // Sin Alerta (Verde)
+      _urlCapaSmn = 'http://mapa.smn.gob.ar/mapcache/tms/1.0.0/argentina_smn_3857_alertas@GoogleMapsCompatible/{z}/{x}/{-y}.png';
     } else if (_diaSeleccionado == 2) {
-      colorZonaCentro = Colors.orange;      // Alerta Naranja
-      colorZonaSur = Colors.amber;          // Alerta Amarilla
+      _urlCapaSmn = 'http://mapa.smn.gob.ar/mapcache/tms/1.0.0/argentina_smn_3857_alertas_dia2@GoogleMapsCompatible/{z}/{x}/{-y}.png';
     } else {
-      colorZonaCentro = Colors.green;       // Sin Alerta (Verde)
-      colorZonaSur = Colors.red;            // Alerta Roja
+      _urlCapaSmn = 'http://mapa.smn.gob.ar/mapcache/tms/1.0.0/argentina_smn_3857_alertas_dia3@GoogleMapsCompatible/{z}/{x}/{-y}.png';
     }
-
-    // 1. Zona Centro
-    _poligonos.add(
-      Polygon(
-        points: [
-          LatLng(-30.0, -64.0),
-          LatLng(-30.0, -59.0),
-          LatLng(-36.0, -59.0),
-          LatLng(-36.0, -64.0),
-        ],
-        color: colorZonaCentro.withAlpha(70),
-        borderColor: colorZonaCentro,
-        borderStrokeWidth: 2,
-      ),
-    );
-
-    // 2. Zona Sur
-    _poligonos.add(
-      Polygon(
-        points: [
-          LatLng(-40.0, -71.0),
-          LatLng(-40.0, -64.0),
-          LatLng(-48.0, -66.0),
-          LatLng(-48.0, -72.0),
-        ],
-        color: colorZonaSur.withAlpha(70),
-        borderColor: colorZonaSur,
-        borderStrokeWidth: 2,
-      ),
-    );
   }
 }
