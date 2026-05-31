@@ -3,16 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/alerta_model.dart';
 import '../../services/alertas_service.dart';
+import 'dart:developer' as developer;
 
-// 📅 Reemplazamos StateProvider por un Notifier moderno de Riverpod 2.x
-// Al heredar de Notifier<int>, exponemos un entero de forma ultra segura.
 final diaSeleccionadoProvider = NotifierProvider<DiaSeleccionadoNotifier, int>(() {
   return DiaSeleccionadoNotifier();
 });
 
 class DiaSeleccionadoNotifier extends Notifier<int> {
   @override
-  int build() => 0; // El estado inicial siempre es 0 (Hoy)
+  int build() => 0;
 
   void cambiarDia(int nuevoIndex) {
     state = nuevoIndex;
@@ -27,7 +26,6 @@ class PantallaAlertasController extends AsyncNotifier<List<AlertaZona>> {
   
   @override
   Future<List<AlertaZona>> build() async {
-    // 🔄 Seguimos escuchando reactivamente el cambio de día
     final indexDia = ref.watch(diaSeleccionadoProvider);
     
     final fechaDestino = DateTime.now().add(Duration(days: indexDia));
@@ -40,12 +38,20 @@ class PantallaAlertasController extends AsyncNotifier<List<AlertaZona>> {
     final List<dynamic> features = geojsonData['features'];
     
     final alertasServiceInstance = AlertasService();
-    final List<dynamic> datosSmn = await alertasServiceInstance.fetchAlertasReales(fecha: fecha);
     
-    return alertasServiceInstance.procesarAlertas(features, datosSmn);
+    try {
+      final List<dynamic> datosSmn = await alertasServiceInstance.fetchAlertasReales(fecha: fecha);
+      return alertasServiceInstance.procesarAlertas(features, datosSmn);
+    } catch (e) {
+      developer.log(
+        "Servidor SMN caído o sin red. Activando modo seguro local.",
+        name: 'MeteoMarti',
+        error: e,
+      );
+      return alertasServiceInstance.procesarAlertas(features, []);
+    }
   }
 
-  // Esta función encapsula el cambio para que tu vista no tenga que cambiar nada
   void seleccionarDia(int index) {
     ref.read(diaSeleccionadoProvider.notifier).cambiarDia(index);
   }
