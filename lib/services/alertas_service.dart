@@ -1,51 +1,124 @@
+import 'package:latlong2/latlong.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/alerta_model.dart';
 import 'package:flutter/foundation.dart';
+import '../models/alerta_model.dart';
+import 'smn_auth_service.dart';
 
-class AlertaService {
-  // Esta es la URL que encontraste (reemplázala por la real)
-  static const String urlSmn = 'AQUI_VA_LA_URL_DEL_JSON_DEL_SMN';
+class AlertasService {
+  final SmnAuthService _authService = SmnAuthService();
+  static const String _apiBaseUrl = 'https://ws1.smn.gob.ar/v1/warning/alert/area';
 
-  // 1. EL "FETCH": Salimos a buscar los datos a internet
-  static Future<List<dynamic>> fetchAlertas() async {
+  // 📅 Ahora acepta una fecha opcional. Si no se la pasamos, por defecto busca 'hoy'.
+  Future<List<dynamic>> fetchAlertasReales({DateTime? fecha}) async {
     try {
-      final response = await http.get(Uri.parse(urlSmn));
+      final token = await _authService.obtenerTokenDinamico();
       
-      if (response.statusCode == 200) {
-        return json.decode(response.body); // Regresa la lista de objetos de la API
-      } else {
-        throw Exception('Error al conectar con el servidor del SMN');
+      if (token == null) {
+        debugPrint('❌ AlertasService: No se puede hacer la petición porque no se obtuvo un token válido.');
+        return [];
       }
-    } catch (e) {
-      debugPrint("Error: $e");
-      return []; // Retornamos lista vacía si hay error
-    }
-  }
 
-  // 2. LA "FUSIÓN": La lógica que ya teníamos, ahora unida al proceso
-  static List<AlertaZona> procesarAlertas(List<dynamic> features, List<dynamic> datosSmn) {
-    List<AlertaZona> listaFinal = [];
-
-    for (var feature in features) {
-      int gid = feature['properties']['gid'];
+      // Si viene una fecha la usa, sino usa la hora actual del dispositivo
+      final ahora = fecha ?? DateTime.now();
+      final anio = ahora.year.toString();
+      final mes = ahora.month.toString().padLeft(2, '0');
+      final dia = ahora.day.toString().padLeft(2, '0');
       
-      var data = datosSmn.firstWhere(
-        (item) => item['area_id'] == gid, 
-        orElse: () => null
+      final fechaFormateada = '$anio-$mes-$dia';
+      debugPrint('Fecha calculada para la API: $fechaFormateada');
+
+      final urlCompleta = Uri.parse(
+        '$_apiBaseUrl?mode=alert&date=$fechaFormateada&compact=true'
       );
 
-      int nivel = 0;
-      if (data != null && data['warnings'] != null && (data['warnings'] as List).isNotEmpty) {
-        nivel = data['warnings'][0]['max_level'] ?? 0;
+      debugPrint('Conectando a la API del SMN: $urlCompleta');
+
+      final response = await http.get(
+        urlCompleta,
+        headers: {
+          'Authorization': 'JWT $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // 🚨 REVISIÓN DE SEGURIDAD 🚨
+        debugPrint('====== DIAGNÓSTICO SMN ======');
+        debugPrint('1. ¿Llegó respuesta del body?: ${response.body.isNotEmpty}');
+        debugPrint('2. Contenido crudo del JSON del SMN:');
+        debugPrint(response.body); 
+        debugPrint('==============================');
+
+        final List<dynamic> dataJson = json.decode(response.body);
+        debugPrint('📦 Cantidad de registros de alerta recibidos: ${dataJson.length}');
+        return dataJson;
+
+      } else if (response.statusCode == 401) {
+        debugPrint('❌ Error de Autenticación (401): El token fue rechazado por el SMN.');
+      } else {
+        debugPrint('❌ Error de respuesta del SMN. Código: ${response.statusCode} - Body: ${response.body}');
       }
 
-      listaFinal.add(AlertaZona(
-        gid: gid,
-        maxLevel: nivel,
-        coordenadas: feature['geometry']['coordinates'],
-      ));
+    } catch (e) {
+      debugPrint('❌ Error crítico en AlertasService al traer datos reales: $e');
     }
-    return listaFinal;
+    return [];
+  }
+
+  List<AlertaZona> procesarAlertas(List<dynamic> features, List<dynamic> datosSmn) {
+    debugPrint('🔄 Fusionando ${features.length} zonas geométricas con ${datosSmn.length} alertas vivas...');
+    
+    List<AlertaZona> zonasProcesadas = [];
+
+    for (var feature in features) {
+      final properties = feature['properties'] ?? {};
+      final geometry = feature['geometry'] ?? {};
+  
+      final String idZonaGeoStr = (properties['id'] ?? properties['id_zona'] ?? properties['OBJECTID'] ?? properties['gid'] ?? '').toString();
+      if (idZonaGeoStr.isEmpty) continue;
+
+      final alertaSmn = datosSmn.firstWhere(
+        (alerta) => (alerta['area_id'] ?? '').toString() == idZonaGeoStr,
+        orElse: () => null,
+      );
+
+      int nivelAlerta = 0;
+      if (alertaSmn != null && alertaSmn['warnings'] != null && (alertaSmn['warnings'] as List).isNotEmpty) {
+        nivelAlerta = alertaSmn['warnings'][0]['max_level'] ?? 0;
+      }
+
+      // Comentado para no saturar la consola con 168 líneas cada vez:
+      // debugPrint('Zona $idZonaGeoStr -> Nivel=$nivelAlerta');
+
+      List<LatLng> puntosDePoligono = [];
+      try {
+        if (geometry['type'] == 'Polygon') {
+          final coords = geometry['coordinates'][0] as List<dynamic>;
+          for (var coord in coords) {
+            puntosDePoligono.add(LatLng(coord[1].toDouble(), coord[0].toDouble()));
+          }
+        } else if (geometry['type'] == 'MultiPolygon') {
+          final coords = geometry['coordinates'][0][0] as List<dynamic>;
+          for (var coord in coords) {
+            puntosDePoligono.add(LatLng(coord[1].toDouble(), coord[0].toDouble()));
+          }
+        }
+      } catch (e) {
+        debugPrint('Error parseando geometría de zona $idZonaGeoStr: $e');
+        continue;
+      }
+
+      if (puntosDePoligono.isNotEmpty) {
+        zonasProcesadas.add(
+          AlertaZona(
+            gid: int.tryParse(idZonaGeoStr) ?? 0,
+            maxLevel: nivelAlerta,
+            coordenadas: puntosDePoligono,
+          ),
+        );
+      }
+    }
+    return zonasProcesadas;
   }
 }
