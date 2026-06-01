@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app_clima_01/config/app_theme.dart';
+import 'package:marquee/marquee.dart'; // 👈 1. IMPORTANTE: Agregamos este import
 
 class BotonEmergencia extends StatelessWidget {
   final String texto;
@@ -43,21 +44,26 @@ class BotonEmergencia extends StatelessWidget {
               style: AppTheme.buttonTitle.copyWith(color: colorAccento),
             ),
             
-            // 3. 🛑 ¡ACÁ REGULÁS LOS PÍXELES! 🛑
-            // Cambiá este 40 por el número que quieras (30, 50, 65...) para alejarlo a tu gusto
-            const SizedBox(width: 45), 
-            
-            // 4. El Subtexto (Vuelve a alinearse a la izquierda normal)
+            // 3. Espaciado intermedio
+            const SizedBox(width: 15), 
+            // MARQUESINA ANIMADA!
             Expanded(
-              child: Text(
-                subtexto,
-                textAlign: TextAlign.start, // 👈 Volvió a la izquierda
-                style: TextStyle(
-                  fontSize: 14,
-                  color: colorSubtexto,
+              child: SizedBox(
+                height: 20, // 👈 Se necesita una altura fija para que Marquee funcione dentro de una Fila
+                child: Marquee(
+                  text: subtexto,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: colorSubtexto,
+                  ),
+                  scrollAxis: Axis.horizontal, // Movimiento horizontal de derecha a izquierda
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  blankSpace: 40.0, // El espacio en blanco que queda antes de que la frase vuelva a empezar
+                  velocity: 25.0, // La velocidad del cartel (más alto = más rápido)
+                  pauseAfterRound: const Duration(seconds: 2), // Se frena 2 segundos cada vez que termina de mostrar la frase entera
+                  accelerationDuration: const Duration(seconds: 1),
+                  accelerationCurve: Curves.linear,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
             

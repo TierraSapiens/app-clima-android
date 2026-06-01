@@ -74,15 +74,15 @@ class PantallaAcercaDe extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.amber.withValues(alpha: 0.2), width: 1),
               ),
-              child: Row(
+              child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.construction_rounded, color: Colors.amber, size: 22),
-                  const SizedBox(width: 12),
+                  Icon(Icons.construction_rounded, color: Colors.amber, size: 22),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'Aplicación en Desarrollo Activo',
                           style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),

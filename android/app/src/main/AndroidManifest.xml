@@ -11,9 +11,9 @@
     </queries>
 
     <application
-        android:label="MeteoClima"
+        android:label="ClimApp"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         
         <activity
             android:name=".MainActivity"
@@ -40,7 +40,7 @@
 
         <meta-data 
             android:name="com.google.android.geo.API_KEY"
-            android:value="ACÁ_VA_TU_API_KEY_DE_GOOGLE_MAPS"/>
+            android:value="ACA_API_KEY_DE_GOOGLE_MAPS"/>
 
     </application>
 

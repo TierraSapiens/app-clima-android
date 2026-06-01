@@ -75,11 +75,11 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       climaEstado.isLoading
-                          ? Padding(
-                              padding: const EdgeInsets.only(top: 150.0),
+                          ? const Padding(
+                              padding: EdgeInsets.only(top: 150.0),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Text(
                                     'Buscando ubicación...',
                                     style: TextStyle(
