@@ -174,47 +174,44 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                     ).toList(),
                                   ),
                                 ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 32), // Espacio con lo de arriba
+
                           BotonEmergencia(
-                            texto: "AVISOS METEOROLÓGICOS",
-                            subtexto:
-                                climaEstado.value?.subtextoAvisos ??
-                                'No hay avisos',
-                            colorAccento:
-                                climaEstado.value?.colorAvisos ??
-                                const Color(0xFF22C55E),
-                            icono:
-                                climaEstado.value?.iconoAvisos ??
-                                Icons.check_circle_outline_rounded,
+                            texto: "AVISOS",
+                            subtexto: climaEstado.value?.subtextoAvisos ?? 'No hay avisos',
+                            colorAccento: const Color(0xFF35c795), 
+                            
+                            // 🔘 CORREGIDO: Cambiamos `?.toLowerCase()` por `.toLowerCase()`
+                            colorSubtexto: (climaEstado.value?.subtextoAvisos.toLowerCase().contains('no hay') ?? true)
+                                ? Colors.white38 
+                                : Colors.amber,
+                                
+                            icono: climaEstado.value?.iconoAvisos ?? Icons.check_circle_outline_rounded,
                             onTap: () {
-                              // 🔥 CAMBIADO: Ahora va a la pantalla de avisos independiente
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) => const PantallaAvisos(),
-                                ),
+                                MaterialPageRoute(builder: (context) => const PantallaAvisos()),
                               );
                             },
                           ),
-                          const SizedBox(height: 16),
+
+                          const SizedBox(height: 14), // La separación de los botones
+
                           BotonEmergencia(
-                            texto: "ALERTAS CRÍTICAS",
-                            subtexto:
-                                climaEstado.value?.subtextoAlertas ??
-                                'No hay alertas',
-                            colorAccento:
-                                climaEstado.value?.colorAlertas ??
-                                const Color(0xFF22C55E),
-                            icono:
-                                climaEstado.value?.iconoAlertas ??
-                                Icons.shield_outlined,
+                            texto: "ALERTAS",
+                            subtexto: climaEstado.value?.subtextoAlertas ?? 'No hay alertas',
+                            colorAccento: const Color(0xFF35c795), 
+                            
+                            // 🟡 CORREGIDO: Lo mismo acá, un punto común antes de toLowerCase()
+                            colorSubtexto: (climaEstado.value?.subtextoAlertas.toLowerCase().contains('no hay') ?? true)
+                                ? Colors.white38 
+                                : Colors.amber,
+                                
+                            icono: climaEstado.value?.iconoAlertas ?? Icons.shield_outlined,
                             onTap: () {
-                              // ✅ SE MANTIENE: Va al nuevo mapa nativo de Google
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) => const PantallaAlertas(),
-                                ),
+                                MaterialPageRoute(builder: (context) => const PantallaAlertas()),
                               );
                             },
                           ),

@@ -6,10 +6,10 @@ class PantallaAvisos extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212), // Fondo oscuro prolijo
+      backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         title: const Text('Avisos Meteorológicos'),
-        backgroundColor: const Color(0xFFE65100), // Naranja para diferenciarlo
+        backgroundColor: const Color(0xFFE65100),
       ),
       body: const Center(
         child: Text(

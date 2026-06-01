@@ -10,11 +10,8 @@ class PantallaAlertas extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 🧠 Escuchamos las alertas de las zonas y también qué día está seleccionado
     final alertasAsync = ref.watch(alertasControllerProvider);
     final indexDiaSeleccionado = ref.watch(diaSeleccionadoProvider);
-
-    // 📅 Configuración para armar las etiquetas de los días dinámicamente
     final ahora = DateTime.now();
     const diasSemana = ['', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'];
 
@@ -24,15 +21,16 @@ class PantallaAlertas extends ConsumerWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () => ref.read(alertasControllerProvider.notifier).refrescarAlertas(),
-            tooltip: 'Refrescar Alertas',
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              debugPrint("📡 Forzando reintento manual de alertas del SMN...");
+              ref.invalidate(alertasControllerProvider);
+            },
           ),
         ],
       ),
       body: Stack(
         children: [
-          // 🗺️ CAPA INTERIOR: El mapa interactivo o el indicador de carga
           alertasAsync.when(
             loading: () => const Center(
               child: Card(
@@ -73,20 +71,20 @@ class PantallaAlertas extends ConsumerWidget {
                   ),
                   PolygonLayer(
                     polygons: listaZonas.map((zona) {
-                      Color colorAlerta = Colors.transparent;
+                      Color colorAlerta = const Color.fromARGB(255, 39, 137, 176);
                       
-                      // 🎨 Corrección de la escala oficial del SMN:
+                      // Colores de la escala oficial del SMN:
                       // 1 = Verde, 2 = Amarillo, 3 = Naranja, 4 = Rojo
-                      if (zona.maxLevel == 1) colorAlerta = Colors.green.shade400; // Estado normal
+                      if (zona.maxLevel == 1) colorAlerta = const Color(0xFF35c795); // Estado normal
                       if (zona.maxLevel == 2) colorAlerta = Colors.amber;          // Alerta Amarilla
                       if (zona.maxLevel == 3) colorAlerta = Colors.orange;         // Alerta Naranja
                       if (zona.maxLevel == 4) colorAlerta = Colors.red;            // Alerta Roja
 
                       return Polygon(
                         points: List<LatLng>.from(zona.coordenadas),
-                        // Le bajamos el alpha al verde (0.15) para que sea un velo sutil y no sature, 
-                        // y dejamos 0.4 para las alertas reales.
-                        color: colorAlerta.withValues(alpha: zona.maxLevel == 1 ? 0.15 : 0.4),
+                        // Se baja el alpha al verde (0.15) para que sea sutil y no sature, 
+                        // y 0.4 para las alertas reales.
+                        color: colorAlerta.withValues(alpha: zona.maxLevel == 1 ? 0.35 : 0.4),
                         borderStrokeWidth: zona.maxLevel == 1 ? 0.5 : 1.2,
                         borderColor: zona.maxLevel == 1 ? colorAlerta.withValues(alpha: 0.3) : colorAlerta,
                       );
@@ -97,7 +95,7 @@ class PantallaAlertas extends ConsumerWidget {
             },
           ),
 
-          // 📅 CAPA SUPERIOR: La botonera flotante de los 3 días
+          // Botonera flotante de los 3 días
           Positioned(
             top: 16,
             left: 16,
@@ -117,7 +115,7 @@ class PantallaAlertas extends ConsumerWidget {
               ),
               child: Row(
                 children: List.generate(3, (index) {
-                  // Calculamos la fecha correspondiente a cada botón (0: Hoy, 1: Mañana, 2: Pasado Mañana)
+                  //fecha correspondiente a cada botón (0: Hoy, 1: Mañana, 2: Pasado Mañana)
                   final fechaBoton = ahora.add(Duration(days: index));
                   final nombreDia = diasSemana[fechaBoton.weekday];
                   final numeroDia = fechaBoton.day;
@@ -128,7 +126,7 @@ class PantallaAlertas extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: InkWell(
                         onTap: () {
-                          // Al tocar el botón le avisamos al controlador que cambie el día
+                  // Al tocar el boton le avisa al controlador que cambie el dia
                           ref.read(alertasControllerProvider.notifier).seleccionarDia(index);
                         },
                         borderRadius: BorderRadius.circular(12),
