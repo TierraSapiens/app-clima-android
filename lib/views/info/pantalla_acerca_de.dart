@@ -41,7 +41,7 @@ class PantallaAcercaDe extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             const Text(
-              'METEOMARTI v1.0.0',
+              'ClimApp v1.0.0',
               style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 0.5),
             ),
             const SizedBox(height: 6),
