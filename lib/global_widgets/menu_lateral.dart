@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app_clima_01/config/app_theme.dart';
+import 'package:app_clima_01/views/info/pantalla_acerca_de.dart';
 
 class MenuLateral extends StatelessWidget {
   const MenuLateral({super.key});
@@ -7,6 +8,8 @@ class MenuLateral extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      // Podés usar un número fijo en píxeles (ej: 280) o un porcentaje de la pantalla.
+      width: MediaQuery.of(context).size.width * 0.50, // 👈 Esto significa el 50% del ancho del celular
       child: Container(
         color: AppTheme.backgroundGradientBottom,
         child: ListView(
@@ -21,7 +24,7 @@ class MenuLateral extends StatelessWidget {
                   Icon(
                     Icons.cloud_queue,
                     color: AppTheme.accentPrimary,
-                    size: 40,
+                    size: 40, //Tamaño de nube principal
                   ),
                   SizedBox(height: 10),
                   Text(
@@ -63,7 +66,16 @@ class MenuLateral extends StatelessWidget {
                 'Acerca de',
                 style: TextStyle(color: Colors.white),
               ),
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                // 1. Primero cerramos el menú lateral (Drawer)
+                Navigator.pop(context); 
+                
+                // 2. Segundo navegamos a la nueva pantalla escalable
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PantallaAcercaDe()),
+                );
+              },
             ),
           ],
         ),

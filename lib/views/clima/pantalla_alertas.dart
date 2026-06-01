@@ -17,18 +17,24 @@ class PantallaAlertas extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mapa de Alertas'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              debugPrint("📡 Forzando reintento manual de alertas del SMN...");
-              ref.invalidate(alertasControllerProvider);
-            },
-          ),
-        ],
+      title: const Text(
+        'Alertas Meteorológicas',
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
+      backgroundColor: const Color(0xFFE65100), // 👈 El naranja que te gustó de Avisos
+      iconTheme: const IconThemeData(color: Colors.white), // Flecha de volver blanca
+      
+      // 🔄 ACÁ ADENTRO CONSERVAMOS TU ACTUALIZADOR:
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: () {
+            debugPrint("📡 Forzando reintento manual de alertas del SMN...");
+            ref.invalidate(alertasControllerProvider);
+          },
+        ),
+      ],
+    ),
       body: Stack(
         children: [
           alertasAsync.when(
