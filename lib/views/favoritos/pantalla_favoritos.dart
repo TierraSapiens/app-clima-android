@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'favoritos_controller.dart';
-import '../clima/pantalla_clima_controller.dart'; // Para actualizar el clima de la Home
 
 class PantallaFavoritos extends ConsumerWidget {
   const PantallaFavoritos({super.key});
@@ -37,7 +36,7 @@ class PantallaFavoritos extends ConsumerWidget {
             itemBuilder: (context, index) {
               final ciudad = listaFavoritos[index];
               return Card(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.5), // 👈 ¡Faltaba poner "color:" y la coma al final!
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: ListTile(

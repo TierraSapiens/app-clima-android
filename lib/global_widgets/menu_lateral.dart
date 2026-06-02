@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:app_clima_01/config/app_theme.dart';
-import 'package:app_clima_01/views/info/pantalla_acerca_de.dart';
+import 'package:app_clima_01/views/info/pantalla_acerca_de.dart'; // 👈 ¡Ahora sí se usa!
+import 'package:app_clima_01/views/favoritos/pantalla_favoritos.dart';
 
 class MenuLateral extends StatelessWidget {
   const MenuLateral({super.key});
@@ -8,69 +8,47 @@ class MenuLateral extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      // Podés usar un número fijo en píxeles (ej: 280) o un porcentaje de la pantalla.
-      width: MediaQuery.of(context).size.width * 0.50, // 👈 Esto significa el 50% del ancho del celular
+      width: MediaQuery.of(context).size.width * 0.65, // Un ancho cómodo para el menú
       child: Container(
-        color: AppTheme.backgroundGradientBottom,
+        color: const Color(0xFF121212), // Fondo oscuro que combina con tu app
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
             const DrawerHeader(
-              decoration: BoxDecoration(color: AppTheme.cardSurface),
+              decoration: BoxDecoration(color: Color(0xFFE65100)), // Tu naranja del SMN
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.cloud_queue,
-                    color: AppTheme.accentPrimary,
-                    size: 40, //Tamaño de nube principal
-                  ),
+                  Icon(Icons.cloud_queue, color: Colors.white, size: 40),
                   SizedBox(height: 10),
                   Text(
-                    'APP CLIMA',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'ClimApp',
+                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
             ),
+            
+            // ⭐ Botón Favoritos
             ListTile(
-              leading: const Icon(
-                Icons.star_border,
-                color: AppTheme.accentPrimary,
-              ),
-              title: const Text(
-                'Favoritos',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () => Navigator.pop(context),
+              leading: const Icon(Icons.star, color: Colors.amber),
+              title: const Text('Favoritos', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PantallaFavoritos()),
+                );
+              },
             ),
-            ListTile(
-              leading: const Icon(
-                Icons.settings_outlined,
-                color: Colors.white70,
-              ),
-              title: const Text(
-                'Configuración',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () => Navigator.pop(context),
-            ),
+
+            // ℹ️ Botón Acerca de (Usa el import y quita la advertencia)
             ListTile(
               leading: const Icon(Icons.info_outline, color: Colors.white70),
-              title: const Text(
-                'Acerca de',
-                style: TextStyle(color: Colors.white),
-              ),
+              title: const Text('Acerca de', style: TextStyle(color: Colors.white)),
               onTap: () {
-                // 1. Primero cerramos el menú lateral (Drawer)
-                Navigator.pop(context); 
-                
-                // 2. Segundo navegamos a la nueva pantalla escalable
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const PantallaAcercaDe()),

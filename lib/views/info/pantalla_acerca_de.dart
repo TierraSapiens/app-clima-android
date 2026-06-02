@@ -22,139 +22,177 @@ class PantallaAcercaDe extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'Acerca de',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         backgroundColor: const Color(0xFFE65100),
         iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 16),
-            // 🌤️ Logo de la App
-            const Icon(
-              Icons.cloud_queue,
-              size: 70,
-              color: AppTheme.accentPrimary,
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'ClimApp v1.0.0',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              'Datos oficiales en tiempo real del SMN.',
-              style: TextStyle(color: Colors.white54, fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-            
-            const SizedBox(height: 20),
-            const Divider(color: Colors.white10),
-            const SizedBox(height: 12),
-
-            // 🔥 NUEVA SECCIÓN: ESTADO DEL PROYECTO
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'ESTADO DEL PROYECTO',
-                style: TextStyle(color: Color.fromARGB(255, 255, 249, 232), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0),
-              ),
-            ),
-            const SizedBox(height: 8),
-            
-            // Tarjeta de aviso de Desarrollo
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14.0),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.amber.withValues(alpha: 0.2), width: 1),
-              ),
-              child: const Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.construction_rounded, color: Colors.amber, size: 22),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // 👈 CORREGIDO: spaceBetween en lugar de between
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
                       children: [
-                        Text(
-                          'Aplicación en Desarrollo Activo',
-                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE65100).withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.cloud_queue,
+                            size: 64,
+                            color: AppTheme.accentPrimary,
+                          ),
                         ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Esta app se encuentra en fase de pruebas. Si encontrás algún error, tenés sugerencias o querés realizar cualquier tipo de consulta, tu mensaje es más que bienvenido para seguir mejorando.',
-                          style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.3),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'ClimApp v1.0.0',
+                          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Datos oficiales en tiempo real del SMN.',
+                          style: TextStyle(color: Colors.white54, fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        const Divider(color: Colors.white10, height: 1),
+                        const SizedBox(height: 24),
+
+                        // 🔥 ESTADO DEL PROYECTO
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'ESTADO DEL PROYECTO',
+                            style: TextStyle(color: Color(0xFFFFE9E2), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        
+                        Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E1E1E),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              // 👈 CORREGIDO: El border ahora está dentro de BoxDecoration
+                              decoration: const BoxDecoration(
+                                border: Border(
+                                  left: BorderSide(color: Colors.amber, width: 4),
+                                ),
+                              ),
+                              padding: const EdgeInsets.all(16.0),
+                              child: const Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.construction_rounded, color: Colors.amber, size: 22),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Aplicación en Desarrollo Activo',
+                                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                                        ),
+                                        SizedBox(height: 6),
+                                        Text(
+                                          'Esta app se encuentra en fase de pruebas. Si encontrás algún error, tenés sugerencias o querés realizar cualquier tipo de consulta, tu mensaje es más que bienvenido para seguir mejorando.',
+                                          style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 28),
+
+                        // 📬 SECCIÓN DE CONTACTO
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'CONTACTO',
+                            style: TextStyle(color: Color(0xFFFFE9E2), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E1E1E),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                          ),
+                          child: Column(
+                            children: [
+                              ListTile(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                leading: const Icon(Icons.email_outlined, color: Color(0xFF35c795)),
+                                title: const Text('Enviar Consulta / Sugerencia', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
+                                subtitle: const Text('trinidadmdp@gmail.com', style: TextStyle(color: Colors.white54, fontSize: 13)), 
+                                trailing: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white24, size: 12),
+                                onTap: () => _abrirEnlace('mailto:trinidadmdp@gmail.com'),
+                              ),
+                              const Divider(color: Colors.white10, height: 1, indent: 16, endIndent: 16),
+                              
+                              ListTile(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                leading: const Icon(Icons.code_rounded, color: Colors.blueAccent),
+                                title: const Text('Código Fuente / GitHub', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
+                                subtitle: const Text('TierraSapiens/app-clima-android', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                                trailing: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white24, size: 12),
+                                onTap: () => _abrirEnlace('https://github.com/TierraSapiens/app-clima-android'),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+
+                    // 🛡️ Pie de página
+                    const Padding(
+                      padding: EdgeInsets.only(top: 32.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Esta aplicación es de uso informativo y no comercial.',
+                            style: TextStyle(color: Colors.white38, fontSize: 11),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '© 2026 ClimApp. Todos los derechos reservados.',
+                            style: TextStyle(color: Colors.white24, fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-
-            const SizedBox(height: 20),
-
-            // 📬 SECCIÓN DE CONTACTO
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'CONTACTO',
-                style: TextStyle(color: Color.fromARGB(255, 248, 227, 216), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0),
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            Card(
-              color: const Color(0xFF1E1E1E),
-              margin: EdgeInsets.zero,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Column(
-                children: [
-                  // Opción de Correo Electrónico
-                  ListTile(
-                    leading: const Icon(Icons.email_outlined, color: Color(0xFF35c795)),
-                    title: const Text('Enviar Consulta / Sugerencia', style: TextStyle(color: Colors.white, fontSize: 14)),
-                    subtitle: const Text('trinidadmdp@gmail.com', style: TextStyle(color: Colors.white54, fontSize: 13)), // 👈 Cambiá por tu mail
-                    trailing: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white24, size: 14),
-                    onTap: () => _abrirEnlace('mailto:tu-correo@email.com'), // 👈 Mantener el mailto:
-                  ),
-                  const Divider(color: Colors.white10, height: 1),
-                  
-                  // Opción de GitHub (Podés borrar este ListTile entero si no lo usás)
-                  ListTile(
-                    leading: const Icon(Icons.code_rounded, color: Colors.blueAccent),
-                    title: const Text('Código Fuente / GitHub', style: TextStyle(color: Colors.white, fontSize: 14)),
-                    subtitle: const Text('https://github.com/TierraSapiens/app-clima-android', style: TextStyle(color: Colors.white54, fontSize: 13)),
-                    trailing: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white24, size: 14),
-                    onTap: () => _abrirEnlace('https://github.com/tu-usuario'),
-                  ),
-                ],
-              ),
-            ),
-
-            const Spacer(),
-            
-            // 🛡️ Pie de página
-            const Text(
-              'Esta aplicación es de uso informativo y no comercial.',
-              style: TextStyle(color: Colors.white38, fontSize: 11),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              '© 2026 ClimApp. Todos los derechos reservados.',
-              style: TextStyle(color: Colors.white24, fontSize: 11),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
