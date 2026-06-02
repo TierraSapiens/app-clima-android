@@ -33,7 +33,7 @@ class PantallaAvisosController extends AsyncNotifier<List<AvisoCortoPlazo>> {
 
       developer.log(
         "📦 Avisos a muy corto plazo procesados con éxito. Cantidad activa: ${avisosValidos.length}",
-        name: 'MeteoMarti',
+        name: 'ClimApp',
       );
 
       return avisosValidos;
@@ -41,7 +41,7 @@ class PantallaAvisosController extends AsyncNotifier<List<AvisoCortoPlazo>> {
       // 🚨 Modo Seguro: Si cae el servidor o hay problemas de red, logueamos y devolvemos vector vacío
       developer.log(
         "Servidor SMN (shortterm) caído o sin red. Activando modo seguro local.",
-        name: 'MeteoMarti',
+        name: 'ClimApp',
         error: e,
         stackTrace: st,
       );

@@ -27,7 +27,6 @@ class PantallaAlertasController extends AsyncNotifier<List<AlertaZona>> {
   @override
   Future<List<AlertaZona>> build() async {
     final indexDia = ref.watch(diaSeleccionadoProvider);
-    
     final fechaDestino = DateTime.now().add(Duration(days: indexDia));
     return _cargarTodaLaData(fechaDestino);
   }
@@ -45,7 +44,7 @@ class PantallaAlertasController extends AsyncNotifier<List<AlertaZona>> {
     } catch (e) {
       developer.log(
         "Servidor SMN caído o sin red. Activando modo seguro local.",
-        name: 'MeteoMarti',
+        name: 'ClimApp',
         error: e,
       );
       return alertasServiceInstance.procesarAlertas(features, []);
@@ -58,8 +57,33 @@ class PantallaAlertasController extends AsyncNotifier<List<AlertaZona>> {
 
   Future<void> refrescarAlertas() async {
     state = const AsyncValue.loading();
-    final indexDia = ref.read(diaSeleccionadoProvider);
+    final indexDia = ref.read(diaSeleccionadoProvider); // 👈 ¡Corregido acá perfectamente!
     final fechaDestino = DateTime.now().add(Duration(days: indexDia));
     state = await AsyncValue.guard(() => _cargarTodaLaData(fechaDestino));
   }
 }
+
+/// 📡 PROVIDER GLOBAL PARA EL BANNER DE LA PANTALLA PRINCIPAL
+/// Revisa los 3 días en segundo plano y avisa si hay peligro inminente (maxLevel > 1)
+final tieneAlertasActivasCualquierDiaProvider = FutureProvider<bool>((ref) async {
+  final String geojsonString = await rootBundle.loadString('assets/geo/areas.geojson');
+  final Map<String, dynamic> geojsonData = json.decode(geojsonString);
+  final List<dynamic> features = geojsonData['features'];
+  final alertasServiceInstance = AlertasService();
+
+  for (int i = 0; i < 3; i++) {
+    try {
+      final fecha = DateTime.now().add(Duration(days: i));
+      final List<dynamic> datosSmn = await alertasServiceInstance.fetchAlertasReales(fecha: fecha);
+      final List<AlertaZona> zonasProcesadas = alertasServiceInstance.procesarAlertas(features, datosSmn);
+      
+      final hayAlertaReal = zonasProcesadas.any((zona) => zona.maxLevel > 1);
+      if (hayAlertaReal) {
+        return true; 
+      }
+    } catch (e) {
+      developer.log("Error silencioso escaneando alertas del día $i para el banner", error: e);
+    }
+  }
+  return false; 
+});

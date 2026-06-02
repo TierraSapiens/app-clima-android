@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:app_clima_01/views/clima/pantalla_alertas.dart';
 import 'package:app_clima_01/views/clima/pantalla_avisos.dart';
 import 'package:app_clima_01/views/clima/pantalla_clima_controller.dart';
+import 'package:app_clima_01/views/clima/pantalla_alertas_controller.dart'; // 👈 1. IMPORTAMOS TU CONTROLADOR DE ALERTAS
 import 'package:app_clima_01/views/clima/widgets/boton_emergencia.dart';
 import 'package:app_clima_01/global_widgets/menu_lateral.dart';
 import 'package:app_clima_01/views/clima/widgets/tarjeta_clima_principal.dart';
@@ -45,6 +46,10 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
   @override
   Widget build(BuildContext context) {
     final climaEstado = ref.watch(climaProvider);
+    
+    // 📡 2. ESCUCHAMOS EL ESCÁNER DE LOS 3 DÍAS EN TIEMPO REAL
+    // Si da true (como por la alerta del miércoles), el botón cambiará de aspecto al instante.
+    final tieneAlertasFuturas = ref.watch(tieneAlertasActivasCualquierDiaProvider).value ?? false;
 
     return Scaffold(
       drawer: const MenuLateral(),
@@ -56,17 +61,17 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
           return WeatherBackground(
             codigoIconoApi: codigoIcono,
             child: RefreshIndicator(
-              color: Colors.white, // Color de la ruedita de carga
-              backgroundColor: const Color(0xFF1E1E1E), // Fondo de la ruedita
+              color: Colors.white, 
+              backgroundColor: const Color(0xFF1E1E1E), 
               onRefresh: () async {
-                // Ejecuta el método load de tu controlador y espera a que termine
                 await ref.read(climaProvider.notifier).load();
+                // Aprovechamos y refrescamos también el escáner global
+                ref.invalidate(tieneAlertasActivasCualquierDiaProvider);
               },
               child: SizedBox(
                 width: double.infinity,
                 height: double.infinity,
                 child: SingleChildScrollView(
-                  // 🔥 Truco: Combinamos AlwaysScrollable con tus BouncingScrollPhysics originales
                   physics: const AlwaysScrollableScrollPhysics(
                     parent: BouncingScrollPhysics(),
                   ),
@@ -118,7 +123,6 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                 final data = climaEstado.value!;
                                 return Stack(
                                   children: [
-                                    // La tarjeta dibuja la ciudad centrada y el clima arriba como en Movil 3
                                     Padding(
                                       padding: EdgeInsets.only(
                                         top: MediaQuery.of(context).padding.top + 15,
@@ -128,7 +132,6 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                         respuesta: data.clima,
                                       ),
                                     ),
-                                    // El menú hamburguesa clavado arriba a la izquierda
                                     Positioned(
                                       top: MediaQuery.of(context).padding.top + 10,
                                       left: 16,
@@ -146,7 +149,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                 );
                               },
                             ),
-                      const SizedBox(height: 14), // Espaciado perfecto con el pronóstico semanal
+                      const SizedBox(height: 14), 
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 12.0,
@@ -183,8 +186,9 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                       ).toList(),
                                     ),
                                   ),
-                            const SizedBox(height: 32), // Espacio con lo de arriba
+                            const SizedBox(height: 32), 
 
+                            // 🟢 BOTÓN DE AVISOS (Se conserva igual)
                             BotonEmergencia(
                               texto: "AVISOS",
                               subtexto: climaEstado.value?.subtextoAvisos ?? 'No hay avisos',
@@ -201,16 +205,28 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                               },
                             ),
 
-                            const SizedBox(height: 14), // La separación de los botones
+                            const SizedBox(height: 14), 
 
+                            // ⚡ 3. BOTÓN DE ALERTAS DINÁMICO ("ASUSTADIZO")
                             BotonEmergencia(
                               texto: "ALERTAS",
-                              subtexto: climaEstado.value?.subtextoAlertas ?? 'No hay alertas',
-                              colorAccento: const Color(0xFF35c795), 
-                              colorSubtexto: (climaEstado.value?.subtextoAlertas.toLowerCase().contains('no hay') ?? true)
-                                  ? Colors.white38 
-                                  : Colors.amber,
-                              icono: climaEstado.value?.iconoAlertas ?? Icons.shield_outlined,
+                              // Si detecta alertas en el futuro, pisa el texto local por uno de advertencia
+                              subtexto: tieneAlertasFuturas 
+                                  ? '¡Hay Alerta!' 
+                                  : (climaEstado.value?.subtextoAlertas ?? 'No hay alertas'),
+                              // Si hay alertas pasa al naranja llamativo de tu AppBar, sino queda en verde amigable
+                              colorAccento: tieneAlertasFuturas 
+                                  ? const Color(0xFFE65100) 
+                                  : const Color(0xFF35c795), 
+                              colorSubtexto: tieneAlertasFuturas 
+                                  ? Colors.amberAccent 
+                                  : (climaEstado.value?.subtextoAlertas.toLowerCase().contains('no hay') ?? true)
+                                      ? Colors.white38 
+                                      : Colors.amber,
+                              // Si hay alerta cambia el escudo por un triángulo de advertencia
+                              icono: tieneAlertasFuturas 
+                                  ? Icons.warning_amber_rounded 
+                                  : (climaEstado.value?.iconoAlertas ?? Icons.shield_outlined),
                               onTap: () {
                                 Navigator.push(
                                   context,
@@ -226,9 +242,9 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                 ),
               ),
             ),
-          ); // Cierra WeatherBackground
-        }, // Cierra builder de body: Builder(
-      ), // Cierra body: Builder(
-    ); // Cierra return Scaffold(
-  } // Cierra Widget build
-} // Cierra _PantallaClimaState
+          ); 
+        }, 
+      ), 
+    ); 
+  } 
+}

@@ -149,7 +149,7 @@ class PantallaAcercaDe extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             const Text(
-              '© 2026 MeteoMarti. Todos los derechos reservados.',
+              '© 2026 ClimApp. Todos los derechos reservados.',
               style: TextStyle(color: Colors.white24, fontSize: 11),
             ),
             const SizedBox(height: 8),
