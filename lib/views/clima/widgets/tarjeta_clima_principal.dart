@@ -34,13 +34,13 @@ class TarjetaClimaPrincipal extends ConsumerWidget {
 
     return Container(
       constraints: const BoxConstraints(minHeight: 380),
-      padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 24.0),
+      padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 24.0),
       child: SafeArea(
         bottom: false,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 1), // (alto) que separan hacia arriba y abajo ej Mar del plata
             
             // 📍 FILA NUEVA: Nombre de la ciudad + Botón interactivo de Corazón
             Row(
@@ -50,6 +50,7 @@ class TarjetaClimaPrincipal extends ConsumerWidget {
                 Text(
                   localidad,
                   style: AppTheme.title.copyWith(
+                    fontSize: 28, // Tamaño ciudad principal
                     letterSpacing: 0.5,
                     fontWeight: FontWeight.w500,
                     color: Colors.white,
@@ -81,22 +82,22 @@ class TarjetaClimaPrincipal extends ConsumerWidget {
               ],
             ),
             
-            const SizedBox(height: 12),
-            Row(
+            const SizedBox(height: 18),
+            Row(   // sirve para que la imagen (el sol, la nube, etc.) no se pegue al número gigante de la temperatura (ej: 14°).
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Image.asset(
                   obtenerRutaImagenClima(respuesta.codigoIcono),
-                  width: 140,
-                  height: 140,
+                  width: 145, // (Agrandás la nube 2px de ancho)
+                  height: 145, // (Agrandás la nube 2px de alto)
                   fit: BoxFit.contain,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 20), // NOTA MEMORIA: Separa el dibujo del clima de los grados del termómetro
                 Text(
                   '${respuesta.temperatura}°',
                   style: const TextStyle(
-                    fontSize: 110,
+                    fontSize: 115,  // (Agranda el número 1px)
                     fontWeight: FontWeight.w100,
                     letterSpacing: -8,
                     height: 0.85,
@@ -112,10 +113,11 @@ class TarjetaClimaPrincipal extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 40), // NOTA MEMORIA: Espacio vertical entre los Grados/Ícono y el texto de Sensación Térmica.
             Text(
               '${respuesta.estado}  •  Sensación térmica ${respuesta.sensacionTermica}°',
               style: AppTheme.subtitle.copyWith(
+                fontSize: 18, // Tamaño estado/sensacion termica
                 color: Colors.white.withValues(alpha: 0.9),
                 fontWeight: FontWeight.w500,
                 shadows: [
