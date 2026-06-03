@@ -1,3 +1,4 @@
+import 'package:latlong2/latlong.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,3 +88,53 @@ final tieneAlertasActivasCualquierDiaProvider = FutureProvider<bool>((ref) async
   }
   return false; 
 });
+/// 📍 PROVIDER LOCAL INTELIGENTE
+/// Recibe las coordenadas de la ciudad actual y dice qué nivel de alerta real tiene (1 = Verde/Normal, 2 = Amarillo, etc.)
+final nivelAlertaLocalProvider = FutureProvider.family<int, LatLng>((ref, coordenadasCiudad) async {
+  final String geojsonString = await rootBundle.loadString('assets/geo/areas.geojson');
+  final Map<String, dynamic> geojsonData = json.decode(geojsonString);
+  final List<dynamic> features = geojsonData['features'];
+  final alertasServiceInstance = AlertasService();
+
+  int maxNivelLocal = 1; // Por defecto es 1 (Verde / Todo normal)
+
+  // Escaneamos los 3 días en segundo plano para esta ciudad específica
+  for (int i = 0; i < 3; i++) {
+    try {
+      final fecha = DateTime.now().add(Duration(days: i));
+      final List<dynamic> datosSmn = await alertasServiceInstance.fetchAlertasReales(fecha: fecha);
+      final List<AlertaZona> zonasProcesadas = alertasServiceInstance.procesarAlertas(features, datosSmn);
+      
+      // Buscamos si las coordenadas de la ciudad caen dentro de alguna zona con alerta activa
+      for (final zona in zonasProcesadas) {
+        if (zona.maxLevel > maxNivelLocal) {
+          if (_isPointInPolygon(coordenadasCiudad, List<LatLng>.from(zona.coordenadas))) {
+            maxNivelLocal = zona.maxLevel; // Encontró alerta en tu ciudad, actualiza el nivel máximo
+          }
+        }
+      }
+    } catch (e) {
+      developer.log("Error silencioso escaneando alerta local del día $i", error: e);
+    }
+  }
+  return maxNivelLocal; 
+});
+
+/// 🏹 ALGORITMO RAY-CASTING (Punto en Polígono)
+/// Verifica matemáticamente si un punto (Lat/Lon) está atrapado dentro de una figura geométrica
+bool _isPointInPolygon(LatLng point, List<LatLng> polygon) {
+  int i;
+  int j = polygon.length - 1;
+  bool inPoly = false;
+
+  for (i = 0; i < polygon.length; i++) {
+    if ((polygon[i].longitude < point.longitude && polygon[j].longitude >= point.longitude ||
+         polygon[j].longitude < point.longitude && polygon[i].longitude >= point.longitude) &&
+        (polygon[i].latitude + (point.longitude - polygon[i].longitude) /
+         (polygon[j].longitude - polygon[i].longitude) * (polygon[j].latitude - polygon[i].latitude) < point.latitude)) {
+      inPoly = !inPoly;
+    }
+    j = i;
+  }
+  return inPoly;
+}

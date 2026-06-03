@@ -96,4 +96,41 @@ class ClimaService {
     }
     return null;
   }
+  // 🔍 NUEVO MÉTODO: Busca ciudades en OpenWeatherMap por texto
+  Future<List<Map<String, dynamic>>> buscarCiudadesPorNombre(String query) async {
+    const String apiKey = "d1f3d163ba58ae2e5fe2e027b312e550";
+    
+    // URL oficial de Geocoding. limit=5 para que traiga hasta 5 opciones
+    final url = Uri.parse(
+      'https://api.openweathermap.org/geo/1.0/direct?q=$query&limit=5&appid=$apiKey',
+    );
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> datos = jsonDecode(response.body);
+        
+        // Mapeamos los resultados crudos a un formato limpio
+        return datos.map((item) {
+          final String ciudad = item['name'] ?? '';
+          final String? provincia = item['state'];
+          final String pais = item['country'] ?? '';
+          
+          // Formateamos el nombre lindo: "Mar del Plata, Buenos Aires, AR"
+          final String nombreCompleto = provincia != null 
+              ? '$ciudad, $provincia, $pais' 
+              : '$ciudad, $pais';
+
+          return {
+            'nombre': nombreCompleto,
+            'lat': item['lat'],
+            'lon': item['lon'],
+          };
+        }).toList();
+      }
+    } catch (e) {
+      debugPrint("Error buscando ciudades: $e");
+    }
+    return []; // Si falla, devuelve lista vacía
+  }
 }

@@ -28,10 +28,15 @@ class BotonEmergencia extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppTheme.buttonSurface.withAlpha(128),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: colorAccento.withAlpha(102), width: 1.5),
+        color: AppTheme.buttonSurface.withAlpha(128),
+        borderRadius: BorderRadius.circular(18),
+        
+        // 🛠️ MODIFICÁ ESTA LÍNEA PARA EL CONTORNO:
+        border: Border.all(
+          color: colorAccento, // 👈 Quitale el '.withAlpha(102)' para que el borde brille con el color puro (verde o naranja)
+          width: 2.0,          // 👈 BOTON borde AVISO y ALERTA Subilo a 2.0 o 2.5 si querés un contorno más marcado y grueso
         ),
+      ),
         child: Row(
           children: [
             // 1. Ícono

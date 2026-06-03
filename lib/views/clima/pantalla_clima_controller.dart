@@ -43,6 +43,7 @@ class ClimaController extends AsyncNotifier<ClimaViewData?> {
     return null;
   }
 
+  // 🛰️ Método existente: Carga el clima usando el GPS del celular
   Future<void> load() async {
     state = const AsyncValue.loading();
     try {
@@ -51,56 +52,71 @@ class ClimaController extends AsyncNotifier<ClimaViewData?> {
       final double lon = ubicacion.longitud;
       final String localidad = ubicacion.localidad;
 
-      final climaResp = await _climaService.obtenerDatosClima(lat, lon);
-      if (climaResp == null) {
-        state = AsyncValue.error(
-          Exception('No se pudieron cargar los datos'),
-          StackTrace.current,
-        );
-        return;
-      }
-
-      Color colorAvisosSMN = const Color(0xFF22C55E);
-      Color colorAlertasSMN = const Color(0xFF22C55E);
-      String subtextoAvisos = 'No hay avisos';
-      String subtextoAlertas = 'No hay Alertas';
-      IconData iconoAvisos = Icons.check_circle_outline_rounded;
-      IconData iconoAlertas = Icons.shield_outlined;
-
-      if (climaResp.nivelAlerta == 2) {
-        colorAvisosSMN = const Color(0xFFF97316);
-        subtextoAvisos = 'Zonas afectadas por lluvias intensas';
-        iconoAvisos = Icons.warning_amber_rounded;
-
-        colorAlertasSMN = const Color(0xFFEF4444);
-        subtextoAlertas = 'Zonas críticas: Tormentas severas';
-        iconoAlertas = Icons.gpp_bad_rounded;
-      } else if (climaResp.nivelAlerta == 1) {
-        colorAvisosSMN = const Color(0xFFF97316);
-        subtextoAvisos = 'Zonas afectadas por chaparrones';
-        iconoAvisos = Icons.warning_amber_rounded;
-
-        colorAlertasSMN = const Color(0xFF22C55E);
-        subtextoAlertas = 'No hay Alertas';
-        iconoAlertas = Icons.shield_outlined;
-      }
-
-      final view = ClimaViewData(
-        clima: climaResp,
-        localidad: localidad,
-        lat: lat,
-        lon: lon,
-        colorAvisos: colorAvisosSMN,
-        colorAlertas: colorAlertasSMN,
-        subtextoAvisos: subtextoAvisos,
-        subtextoAlertas: subtextoAlertas,
-        iconoAvisos: iconoAvisos,
-        iconoAlertas: iconoAlertas,
-      );
-
-      state = AsyncValue.data(view);
+      await _procesarYEstablecerClima(lat, lon, localidad);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
+  }
+
+  // 🔥 NUEVO MÉTODO: Carga el clima de cualquier ciudad elegida por el usuario
+  Future<void> cargarClima(double lat, double lon, String localidad) async {
+    state = const AsyncValue.loading();
+    try {
+      await _procesarYEstablecerClima(lat, lon, localidad);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  // 🛠️ Función auxiliar para no duplicar código de alertas y mapeo
+  Future<void> _procesarYEstablecerClima(double lat, double lon, String localidad) async {
+    final climaResp = await _climaService.obtenerDatosClima(lat, lon);
+    if (climaResp == null) {
+      state = AsyncValue.error(
+        Exception('No se pudieron cargar los datos'),
+        StackTrace.current,
+      );
+      return;
+    }
+
+    Color colorAvisosSMN = const Color(0xFF22C55E);
+    Color colorAlertasSMN = const Color(0xFF22C55E);
+    String subtextoAvisos = 'No hay avisos';
+    String subtextoAlertas = 'No hay Alertas';
+    IconData iconoAvisos = Icons.check_circle_outline_rounded;
+    IconData iconoAlertas = Icons.shield_outlined;
+
+    if (climaResp.nivelAlerta == 2) {
+      colorAvisosSMN = const Color(0xFFF97316);
+      subtextoAvisos = 'Zonas afectadas por lluvias intensas';
+      iconoAvisos = Icons.warning_amber_rounded;
+
+      colorAlertasSMN = const Color(0xFFEF4444);
+      subtextoAlertas = 'Zonas críticas: Tormentas severas';
+      iconoAlertas = Icons.gpp_bad_rounded;
+    } else if (climaResp.nivelAlerta == 1) {
+      colorAvisosSMN = const Color(0xFFF97316);
+      subtextoAvisos = 'Zonas afectadas por chaparrones';
+      iconoAvisos = Icons.warning_amber_rounded;
+
+      colorAlertasSMN = const Color(0xFF22C55E);
+      subtextoAlertas = 'No hay Alertas';
+      iconoAlertas = Icons.shield_outlined;
+    }
+
+    final view = ClimaViewData(
+      clima: climaResp,
+      localidad: localidad,
+      lat: lat,
+      lon: lon,
+      colorAvisos: colorAvisosSMN,
+      colorAlertas: colorAlertasSMN,
+      subtextoAvisos: subtextoAvisos,
+      subtextoAlertas: subtextoAlertas,
+      iconoAvisos: iconoAvisos,
+      iconoAlertas: iconoAlertas,
+    );
+
+    state = AsyncValue.data(view);
   }
 }

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // 👈 NUEVO: Para que funcione Riverpod
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
 import 'package:app_clima_01/config/app_theme.dart';
 import 'package:app_clima_01/models/clima_model.dart';
 import 'package:app_clima_01/utils/conversores_clima.dart';
-import 'package:app_clima_01/views/favoritos/favoritos_controller.dart'; // 👈 NUEVO: Para controlar tus favoritos
+import 'package:app_clima_01/views/favoritos/favoritos_controller.dart'; 
 
-// 🔄 CAMBIAMOS StatelessWidget por ConsumerWidget para activar Riverpod en la tarjeta
 class TarjetaClimaPrincipal extends ConsumerWidget {
   final String localidad;
   final ClimaRespuesta respuesta;
@@ -21,7 +20,6 @@ class TarjetaClimaPrincipal extends ConsumerWidget {
   });
 
   @override
-  // ✨ Ahora "WidgetRef ref" es válido y funciona perfectamente
   Widget build(BuildContext context, WidgetRef ref) {
     
     // 📡 Escuchamos la lista de favoritos guardada en el almacenamiento del teléfono
@@ -40,42 +38,46 @@ class TarjetaClimaPrincipal extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 1), // (alto) que separan hacia arriba y abajo ej Mar del plata
+            const SizedBox(height: 1), 
             
-            // 📍 FILA NUEVA: Nombre de la ciudad + Botón interactivo de Corazón
+            // 📍 FILA OPTIMIZADA: Nombre de la ciudad protegido contra desbordamientos + Corazón
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min, // Hace que la fila se ajuste al contenido si es corto
               children: [
-                Text(
-                  localidad,
-                  style: AppTheme.title.copyWith(
-                    fontSize: 28, // Tamaño ciudad principal
-                    letterSpacing: 0.5,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                    shadows: [
-                      const Shadow(
-                        blurRadius: 8.0,
-                        color: Colors.black45,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
+                Flexible(
+                  child: Text(
+                    localidad,
+                    maxLines: 1, // Evita que se duplique hacia abajo desarmando el diseño
+                    overflow: TextOverflow.ellipsis, // Clava los '...' de forma elegante si es muy largo
+                    style: AppTheme.title.copyWith(
+                      fontSize: 28, 
+                      letterSpacing: 0.5,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                      shadows: [
+                        const Shadow(
+                          blurRadius: 8.0,
+                          color: Colors.black45,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10), // Espacio de separación horizontal con el corazón
                 
-                // 🪙 EL BOTÓN DEL CORAZÓN (Tal cual tus diseños Movil37c y d)
+                // 🪙 EL BOTÓN DEL CORAZÓN (Se mantiene firme en su lugar)
                 IconButton(
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   icon: Icon(
                     esFavorita ? Icons.favorite : Icons.favorite_border,
-                    color: esFavorita ? Colors.red : Colors.white, // Se pone rojo si es favorita
-                    size: 28, // Tamaño ideal alineado al texto grande
+                    color: esFavorita ? Colors.red : Colors.white, 
+                    size: 28, 
                   ),
                   onPressed: () {
-                    // Agrega o quita de la base de datos local sin interferir con el clima
                     ref.read(favoritosProvider.notifier).alternarFavorito(localidad, lat, lon);
                   },
                 ),
@@ -83,21 +85,21 @@ class TarjetaClimaPrincipal extends ConsumerWidget {
             ),
             
             const SizedBox(height: 18),
-            Row(   // sirve para que la imagen (el sol, la nube, etc.) no se pegue al número gigante de la temperatura (ej: 14°).
+            Row(   
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Image.asset(
                   obtenerRutaImagenClima(respuesta.codigoIcono),
-                  width: 145, // (Agrandás la nube 2px de ancho)
-                  height: 145, // (Agrandás la nube 2px de alto)
+                  width: 145, 
+                  height: 145, 
                   fit: BoxFit.contain,
                 ),
-                const SizedBox(width: 20), // NOTA MEMORIA: Separa el dibujo del clima de los grados del termómetro
+                const SizedBox(width: 20), 
                 Text(
                   '${respuesta.temperatura}°',
                   style: const TextStyle(
-                    fontSize: 115,  // (Agranda el número 1px)
+                    fontSize: 115,  
                     fontWeight: FontWeight.w100,
                     letterSpacing: -8,
                     height: 0.85,
@@ -113,11 +115,11 @@ class TarjetaClimaPrincipal extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 40), // NOTA MEMORIA: Espacio vertical entre los Grados/Ícono y el texto de Sensación Térmica.
+            const SizedBox(height: 40), 
             Text(
               '${respuesta.estado}  •  Sensación térmica ${respuesta.sensacionTermica}°',
               style: AppTheme.subtitle.copyWith(
-                fontSize: 18, // Tamaño estado/sensacion termica
+                fontSize: 18, 
                 color: Colors.white.withValues(alpha: 0.9),
                 fontWeight: FontWeight.w500,
                 shadows: [
