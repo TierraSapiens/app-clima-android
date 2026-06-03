@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -6,7 +7,7 @@ import 'package:app_clima_01/utils/conversores_clima.dart';
 
 class ClimaService {
   Future<ClimaRespuesta?> obtenerDatosClima(double lat, double lon) async {
-    const String apiKey = "d1f3d163ba58ae2e5fe2e027b312e550";
+    final String apiKey = dotenv.env['OPENWEATHER_API_KEY'] ?? '';
 
     final urlActual = Uri.parse(
       'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=metric&lang=es',
@@ -98,7 +99,7 @@ class ClimaService {
   }
   // 🔍 NUEVO MÉTODO: Busca ciudades en OpenWeatherMap por texto
   Future<List<Map<String, dynamic>>> buscarCiudadesPorNombre(String query) async {
-    const String apiKey = "d1f3d163ba58ae2e5fe2e027b312e550";
+    final String apiKey = dotenv.env['OPENWEATHER_API_KEY'] ?? '';
     
     // URL oficial de Geocoding. limit=5 para que traiga hasta 5 opciones
     final url = Uri.parse(

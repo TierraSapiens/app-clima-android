@@ -4,10 +4,12 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:app_clima_01/config/app_theme.dart';
 import 'package:app_clima_01/firebase/conexion_firebase.dart';
 import 'package:app_clima_01/views/clima/pantalla_clima.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // <-- 1. AGREGAMOS ESTE IMPORT
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es_AR', null);
+  await dotenv.load(fileName: ".env"); // <-- 2. CARGAMOS LAS VARIABLES DE ENTORNO ACÁ
   runApp(const ProviderScope(child: MiAppDeClima()));
 }
 
