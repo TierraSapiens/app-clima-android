@@ -34,23 +34,40 @@ class UbicacionService {
     }
 
     try {
-      Position posicion = await Geolocator.getCurrentPosition(
+      Position? posicion = await Geolocator.getLastKnownPosition();
+
+      if (posicion != null) {
+        final antiguedad = DateTime.now().difference(posicion.timestamp);
+        if (antiguedad.inHours > 6) {
+          debugPrint("⏳ La ubicación guardada es vieja (${antiguedad.inHours}hs). Forzamos búsqueda fresca.");
+          posicion = null; 
+        }
+      }
+
+      posicion ??= await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.low,
         ),
-      );
+      ).timeout(const Duration(seconds: 6), onTimeout: () {
+        throw Exception("El GPS tardó demasiado en responder");
+      });
 
       String localidadDetectada = "Desconocido";
 
-      List<Placemark> marcas = await placemarkFromCoordinates(
-        posicion.latitude,
-        posicion.longitude,
-      );
+      try {
+        List<Placemark> marcas = await placemarkFromCoordinates(
+          posicion.latitude,
+          posicion.longitude,
+        );
 
-      if (marcas.isNotEmpty) {
-        Placemark lugar = marcas.first;
-        localidadDetectada =
-            lugar.locality ?? lugar.administrativeArea ?? "Desconocido";
+        if (marcas.isNotEmpty) {
+          Placemark lugar = marcas.first;
+          localidadDetectada =
+              lugar.locality ?? lugar.administrativeArea ?? "Desconocido";
+        }
+      } catch (e) {
+        debugPrint("Error en geocoding (conversión de coordenadas): $e");
+        localidadDetectada = "Mar del Plata"; 
       }
 
       return UbicacionDatos(
@@ -58,9 +75,14 @@ class UbicacionService {
         longitud: posicion.longitude,
         localidad: localidadDetectada,
       );
+
     } catch (e) {
       debugPrint("Error interno en UbicacionService: $e");
-      throw Exception("Error al buscar");
+      return UbicacionDatos(
+        latitud: -38.0055, 
+        longitud: -57.5426, 
+        localidad: "Mar del Plata (Defecto)"
+      );
     }
   }
 }
