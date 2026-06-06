@@ -67,7 +67,6 @@ class _PantallaFavoritosState extends ConsumerState<PantallaFavoritos> {
       ),
       body: Column(
         children: [
-          // 1. 🔍 BARRA DE BÚSQUEDA
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
@@ -105,7 +104,6 @@ class _PantallaFavoritosState extends ConsumerState<PantallaFavoritos> {
             ),
           ),
 
-          // 2. ⚡ SECCIÓN DINÁMICA
           Expanded(
             child: _searchController.text.isNotEmpty
                 ? _construirResultadosBusqueda()
@@ -116,7 +114,6 @@ class _PantallaFavoritosState extends ConsumerState<PantallaFavoritos> {
     );
   }
 
-  // 📝 WIDGET: Muestra las ciudades que arroja el buscador
   Widget _construirResultadosBusqueda() {
     if (_cargandoBusqueda) {
       return const Center(child: CircularProgressIndicator(color: Colors.amber));
@@ -145,8 +142,6 @@ class _PantallaFavoritosState extends ConsumerState<PantallaFavoritos> {
             builder: (context, ref, child) {
               final favoritosAsync = ref.watch(favoritosProvider);
               final lista = favoritosAsync.value ?? [];
-              
-              // 🔥 SOLUCIÓN PROBLEMA 3: Comparamos por latitud y longitud únicas en vez de solo por nombre
               final bool yaEsFavorito = lista.any((c) => c.lat == ciudadResult.lat && c.lon == ciudadResult.lon);
 
               return IconButton(
@@ -169,7 +164,6 @@ class _PantallaFavoritosState extends ConsumerState<PantallaFavoritos> {
     );
   }
 
-  // 📝 WIDGET: Tu lista original de favoritos guardados
   Widget _construirListaFavoritos(AsyncValue<List<LocalidadFavorita>> favoritosEstado) {
     return favoritosEstado.when(
       loading: () => const Center(child: CircularProgressIndicator(color: Colors.white)),
@@ -209,8 +203,6 @@ class _PantallaFavoritosState extends ConsumerState<PantallaFavoritos> {
                     ref.read(favoritosProvider.notifier).alternarFavorito(ciudad.nombre, ciudad.lat, ciudad.lon);
                   },
                 ),
-                
-                // 🔥 SOLUCIÓN PROBLEMA 2: Agregamos cargarClima antes de cerrar la pantalla
                 onTap: () {
                   ref.read(climaProvider.notifier).cargarClima(ciudad.lat, ciudad.lon, ciudad.nombre);
                   Navigator.pop(context);

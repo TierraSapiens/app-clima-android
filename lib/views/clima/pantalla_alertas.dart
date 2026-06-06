@@ -21,10 +21,9 @@ class PantallaAlertas extends ConsumerWidget {
         'Alertas Meteorológicas',
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
-      backgroundColor: const Color(0xFFE65100), // 👈 El naranja que te gustó de Avisos
-      iconTheme: const IconThemeData(color: Colors.white), // Flecha de volver blanca
+      backgroundColor: const Color(0xFFE65100),
+      iconTheme: const IconThemeData(color: Colors.white),
       
-      // 🔄 ACÁ ADENTRO CONSERVAMOS TU ACTUALIZADOR:
       actions: [
         IconButton(
           icon: const Icon(Icons.refresh),
@@ -79,8 +78,6 @@ class PantallaAlertas extends ConsumerWidget {
                     polygons: listaZonas.map((zona) {
                       Color colorAlerta = const Color.fromARGB(255, 39, 137, 176);
                       
-                      // Colores de la escala oficial del SMN:
-                      // 1 = Verde, 2 = Amarillo, 3 = Naranja, 4 = Rojo
                       if (zona.maxLevel == 1) colorAlerta = const Color(0xFF35c795); // Estado normal
                       if (zona.maxLevel == 2) colorAlerta = Colors.amber;          // Alerta Amarilla
                       if (zona.maxLevel == 3) colorAlerta = Colors.orange;         // Alerta Naranja
@@ -88,8 +85,6 @@ class PantallaAlertas extends ConsumerWidget {
 
                       return Polygon(
                         points: List<LatLng>.from(zona.coordenadas),
-                        // Se baja el alpha al verde (0.15) para que sea sutil y no sature, 
-                        // y 0.4 para las alertas reales.
                         color: colorAlerta.withValues(alpha: zona.maxLevel == 1 ? 0.35 : 0.4),
                         borderStrokeWidth: zona.maxLevel == 1 ? 0.5 : 1.2,
                         borderColor: zona.maxLevel == 1 ? colorAlerta.withValues(alpha: 0.3) : colorAlerta,
@@ -101,7 +96,6 @@ class PantallaAlertas extends ConsumerWidget {
             },
           ),
 
-          // Botonera flotante de los 3 días
           Positioned(
             top: 16,
             left: 16,
@@ -121,7 +115,6 @@ class PantallaAlertas extends ConsumerWidget {
               ),
               child: Row(
                 children: List.generate(3, (index) {
-                  //fecha correspondiente a cada botón (0: Hoy, 1: Mañana, 2: Pasado Mañana)
                   final fechaBoton = ahora.add(Duration(days: index));
                   final nombreDia = diasSemana[fechaBoton.weekday];
                   final numeroDia = fechaBoton.day;
@@ -132,7 +125,6 @@ class PantallaAlertas extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: InkWell(
                         onTap: () {
-                  // Al tocar el boton le avisa al controlador que cambie el dia
                           ref.read(alertasControllerProvider.notifier).seleccionarDia(index);
                         },
                         borderRadius: BorderRadius.circular(12),

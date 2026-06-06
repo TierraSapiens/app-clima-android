@@ -4,8 +4,6 @@ import 'package:app_clima_01/config/app_theme.dart';
 
 class PantallaAcercaDe extends StatelessWidget {
   const PantallaAcercaDe({super.key});
-
-  /// Método para abrir el correo o enlaces externos de forma segura
   Future<void> _abrirEnlace(String url) async {
     final Uri uri = Uri.parse(url);
     try {
@@ -70,8 +68,6 @@ class PantallaAcercaDe extends StatelessWidget {
                         const SizedBox(height: 24),
                         const Divider(color: Colors.white10, height: 1),
                         const SizedBox(height: 24),
-
-                        // 🔥 ESTADO DEL PROYECTO
                         const Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
@@ -91,7 +87,6 @@ class PantallaAcercaDe extends StatelessWidget {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
-                              // 👈 CORREGIDO: El border ahora está dentro de BoxDecoration
                               decoration: const BoxDecoration(
                                 border: Border(
                                   left: BorderSide(color: Colors.amber, width: 4),
@@ -126,8 +121,6 @@ class PantallaAcercaDe extends StatelessWidget {
                         ),
 
                         const SizedBox(height: 28),
-
-                        // 📬 SECCIÓN DE CONTACTO
                         const Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
@@ -169,7 +162,6 @@ class PantallaAcercaDe extends StatelessWidget {
                       ],
                     ),
 
-                    // 🛡️ Pie de página
                     const Padding(
                       padding: EdgeInsets.only(top: 32.0),
                       child: Column(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app_clima_01/views/info/pantalla_acerca_de.dart'; 
-import 'package:app_clima_01/views/favoritos/pantalla_favoritos.dart'; // 👈 Se usa para navegar
+import 'package:app_clima_01/views/favoritos/pantalla_favoritos.dart';
 
 class MenuLateral extends StatelessWidget {
   const MenuLateral({super.key});
@@ -8,9 +8,9 @@ class MenuLateral extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.45, // Un ancho cómodo para el menú
+      width: MediaQuery.of(context).size.width * 0.45,
       child: Container(
-        color: const Color.fromARGB(255, 2, 3, 65), // Fondo oscuro
+        color: const Color.fromARGB(255, 2, 3, 65),
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
@@ -30,14 +30,11 @@ class MenuLateral extends StatelessWidget {
               ),
             ),
             
-            // ⭐ Botón Favoritos (¡CORREGIDO!)
             ListTile(
               leading: const Icon(Icons.star, color: Colors.amber),
               title: const Text('Favoritos', style: TextStyle(color: Colors.white)),
               onTap: () {
-                Navigator.pop(context); // 1. Cierra el menú lateral para que no quede abierto de fondo
-                
-                // 2. Abre tu hermosa pantalla de favoritos con el buscador integrado
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const PantallaFavoritos()),
@@ -45,7 +42,6 @@ class MenuLateral extends StatelessWidget {
               },
             ),
 
-            // ℹ️ Botón Acerca de
             ListTile(
               leading: const Icon(Icons.info_outline, color: Colors.white70),
               title: const Text('Acerca de', style: TextStyle(color: Colors.white)),

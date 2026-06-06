@@ -1,6 +1,6 @@
 class AlertaZona {
   final int gid;
-  final int maxLevel; // 0: Sin alerta, 1: Amarillo, 2: Naranja, 3: Rojo
+  final int maxLevel;
   final List<dynamic> coordenadas;
 
   AlertaZona({

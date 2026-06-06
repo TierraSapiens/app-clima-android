@@ -21,11 +21,7 @@ class TarjetaClimaPrincipal extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    
-    // 📡 Escuchamos la lista de favoritos guardada en el almacenamiento del teléfono
     final listaFavoritos = ref.watch(favoritosProvider).value ?? [];
-    
-    // ❤️ Evaluamos en tiempo real si esta ciudad ya está guardada en favoritos
     final bool esFavorita = listaFavoritos.any(
       (ciu) => ciu.nombre.toLowerCase() == localidad.toLowerCase()
     );
@@ -40,17 +36,16 @@ class TarjetaClimaPrincipal extends ConsumerWidget {
           children: [
             const SizedBox(height: 1), 
             
-            // 📍 FILA OPTIMIZADA: Nombre de la ciudad protegido contra desbordamientos + Corazón
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min, // Hace que la fila se ajuste al contenido si es corto
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Flexible(
                   child: Text(
                     localidad,
-                    maxLines: 1, // Evita que se duplique hacia abajo desarmando el diseño
-                    overflow: TextOverflow.ellipsis, // Clava los '...' de forma elegante si es muy largo
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTheme.title.copyWith(
                       fontSize: 28, 
                       letterSpacing: 0.5,
@@ -66,9 +61,8 @@ class TarjetaClimaPrincipal extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 10), // Espacio de separación horizontal con el corazón
+                const SizedBox(width: 10),
                 
-                // 🪙 EL BOTÓN DEL CORAZÓN (Se mantiene firme en su lugar)
                 IconButton(
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),

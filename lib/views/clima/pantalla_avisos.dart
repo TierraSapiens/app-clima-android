@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'pantalla_avisos_controller.dart'; // Ajustá la ruta si está en otra carpeta
+import 'pantalla_avisos_controller.dart';
 
 class PantallaAvisos extends StatelessWidget {
   const PantallaAvisos({super.key});
@@ -17,7 +17,6 @@ class PantallaAvisos extends StatelessWidget {
         backgroundColor: const Color(0xFFE65100),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
-          // Botón de refresco manual usando un Consumer aislado
           Consumer(
             builder: (context, ref, _) {
               return IconButton(
@@ -30,15 +29,12 @@ class PantallaAvisos extends StatelessWidget {
       ),
       body: Consumer(
         builder: (context, ref, child) {
-          // Escuchamos el estado reactivo del controlador de avisos
           final avisosAsync = ref.watch(avisosControllerProvider);
 
           return avisosAsync.when(
-            // 1. Estado Cargando
             loading: () => const Center(
               child: CircularProgressIndicator(color: Color(0xFFE65100)),
             ),
-            // 2. Estado Error (Modo seguro / Servidor caído)
             error: (err, stack) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
@@ -49,9 +45,8 @@ class PantallaAvisos extends StatelessWidget {
                 ),
               ),
             ),
-            // 3. Estado con Datos Exitosos
+            
             data: (listaDeAvisos) {
-              // Si la lista del SMN viene vacía (No hay tormentas a corto plazo)
               if (listaDeAvisos.isEmpty) {
                 return Center(
                   child: Column(
@@ -77,7 +72,6 @@ class PantallaAvisos extends StatelessWidget {
                 );
               }
 
-              // Si hay avisos activos, los listamos en Tarjetas de Alerta
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                 itemCount: listaDeAvisos.length,
@@ -86,7 +80,7 @@ class PantallaAvisos extends StatelessWidget {
                   
                   return Card(
                     color: const Color(0xFF1E1E1E),
-                    margin: const EdgeInsets.only(bottom: 14), // 🛠️ Corregido a EdgeInsets.only
+                    margin: const EdgeInsets.only(bottom: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                       side: const BorderSide(color: Color(0xFFE65100), width: 1.2),
@@ -127,7 +121,7 @@ class PantallaAvisos extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: const Color(0x26E65100), // 🛠️ Corregido para limpiar el warning de withOpacity
+                                  color: const Color(0x26E65100),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(

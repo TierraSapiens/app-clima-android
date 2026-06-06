@@ -43,7 +43,6 @@ class ClimaController extends AsyncNotifier<ClimaViewData?> {
     return null;
   }
 
-  // 🛰️ Método existente: Carga el clima usando el GPS del celular
   Future<void> load() async {
     state = const AsyncValue.loading();
     try {
@@ -58,7 +57,6 @@ class ClimaController extends AsyncNotifier<ClimaViewData?> {
     }
   }
 
-  // 🔥 NUEVO MÉTODO: Carga el clima de cualquier ciudad elegida por el usuario
   Future<void> cargarClima(double lat, double lon, String localidad) async {
     state = const AsyncValue.loading();
     try {
@@ -68,7 +66,6 @@ class ClimaController extends AsyncNotifier<ClimaViewData?> {
     }
   }
 
-  // 🛠️ Función auxiliar para no duplicar código de alertas y mapeo
   Future<void> _procesarYEstablecerClima(double lat, double lon, String localidad) async {
     final climaResp = await _climaService.obtenerDatosClima(lat, lon);
     if (climaResp == null) {

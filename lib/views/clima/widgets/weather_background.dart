@@ -11,17 +11,15 @@ class WeatherBackground extends StatelessWidget {
   });
 
   String _obtenerRutaImagen(String codigo) {
-    // Día despejado
+    // Dia despejado
     if (codigo == '01d') {
       return 'assets/images/cielo_dia_despejado.jpg';
     }
-
     // Noche despejada
     if (codigo == '01n') {
       return 'assets/images/cielo_noche_despejado.jpg';
     }
-
-    // Nubes día
+    // Nubes dia
     if (codigo.startsWith('02') ||
         codigo.startsWith('03') ||
         codigo.startsWith('04')) {
@@ -29,7 +27,6 @@ class WeatherBackground extends StatelessWidget {
           ? 'assets/images/cielo_dia_nublado.jpg'
           : 'assets/images/cielo_noche_nublado.jpg';
     }
-
     // Lluvia / tormenta
     if (codigo.startsWith('09') ||
         codigo.startsWith('10') ||
@@ -39,7 +36,6 @@ class WeatherBackground extends StatelessWidget {
           : 'assets/images/cielo_noche_lluvia.jpg';
     }
 
-    // Fondo fallback
     return codigo.endsWith('d')
         ? 'assets/images/cielo_dia_despejado.jpg'
         : 'assets/images/cielo_noche_despejado.jpg';
@@ -49,8 +45,6 @@ class WeatherBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-
-        // FOTO REAL DEL CLIMA
         Positioned.fill(
           child: Image.asset(
             _obtenerRutaImagen(codigoIconoApi),
@@ -58,14 +52,12 @@ class WeatherBackground extends StatelessWidget {
           ),
         ),
 
-        // CAPA OSCURA SUAVE
         Positioned.fill(
           child: Container(
             color: Colors.black.withValues(alpha: 0.18),
           ),
         ),
 
-        // DEGRADÉ INFERIOR
         Positioned.fill(
           child: Container(
             decoration: BoxDecoration(
@@ -83,7 +75,6 @@ class WeatherBackground extends StatelessWidget {
           ),
         ),
 
-        // CONTENIDO
         Positioned.fill(
           child: child,
         ),

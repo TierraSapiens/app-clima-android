@@ -24,7 +24,6 @@ class TarjetaDia extends StatelessWidget {
       onTap: onTap,
       child: IntrinsicWidth(
         child: Container(
-          // height: 145,
           margin: const EdgeInsets.only(right: 14),
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
           decoration: BoxDecoration(
@@ -50,13 +49,13 @@ class TarjetaDia extends StatelessWidget {
                 style: AppTheme.forecastLabel.copyWith(
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
-                  fontSize: 14, // 👈 Agrandamos un poco la fecha (ej: MAR. 26/05)
+                  fontSize: 14,
                 ),
               ),
               const SizedBox(height: 10),
               Image.asset(
                 imagenAsset,
-                width: 55, //Tamaño icon pronostico (¡Ya quedó impecable!)
+                width: 55,
                 height: 55,
                 fit: BoxFit.contain,
               ),
@@ -66,7 +65,7 @@ class TarjetaDia extends StatelessWidget {
                 style: AppTheme.forecastTemp.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
-                  fontSize: 19, // 👈 Subimos el tamaño de la temperatura (ej: 15° / 7°)
+                  fontSize: 19,
                 ),
               ),
               const SizedBox(height: 6),
@@ -74,7 +73,7 @@ class TarjetaDia extends StatelessWidget {
                 estado,
                 style: AppTheme.forecastStatus.copyWith(
                   color: Colors.white60,
-                  fontSize: 12, // 👈 Subimos a 12 para que "Sol y nubes" sea más legible
+                  fontSize: 12,
                 ),
                 textAlign: TextAlign.center,
               ),

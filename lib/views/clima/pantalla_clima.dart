@@ -72,7 +72,6 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                   physics: const AlwaysScrollableScrollPhysics(
                     parent: BouncingScrollPhysics(),
                   ),
-                  // 🧠 CONTROL TOTAL DE ESTADOS: Evaluamos toda la pantalla junta
                   child: climaEstado.isLoading
                       ? Padding(
                           padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.35),
@@ -116,7 +115,6 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                // 🌟 SECCIÓN 1: Tarjeta Principal y Botón de Menú
                                 Stack(
                                   children: [
                                     Padding(
@@ -126,8 +124,8 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                       child: TarjetaClimaPrincipal(
                                         localidad: climaData.localidad,
                                         respuesta: climaData.clima,
-                                        lat: climaData.lat, // 👈 Pasado perfecto y seguro
-                                        lon: climaData.lon, // 👈 Pasado perfecto y seguro
+                                        lat: climaData.lat,
+                                        lon: climaData.lon,
                                       ),
                                     ),
                                     Positioned(
@@ -146,8 +144,6 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                 ),
                                 
                                 const SizedBox(height: 14), 
-                                
-                                // 🌟 SECCIÓN 2: Pronóstico y Botones de Emergencia
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 12.0,
@@ -157,7 +153,6 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
-                                      // Renderizado seguro del pronóstico usando la variable 'climaData'
                                       if (climaData.clima.pronostico.isNotEmpty)
                                         SingleChildScrollView(
                                           scrollDirection: Axis.horizontal,
@@ -183,18 +178,11 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                         ),
                                         
                                       const SizedBox(height: 32), 
-
-                                      // 🟢 BOTÓN DE AVISOS DINÁMICO (LOCALIZADO POR RAY-CASTING)
                                       Consumer(
                                         builder: (context, ref, child) {
-                                          // 1. Escuchamos todos los avisos del país
                                           final avisosAsync = ref.watch(avisosControllerProvider);
                                           final listaAvisos = avisosAsync.value ?? [];
-                                          
-                                          // 2. Capturamos el punto actual (Ubicación real o Favorito seleccionado)
                                           final LatLng puntoConsulta = LatLng(climaData.lat, climaData.lon);
-
-                                          // 🧮 Algoritmo Ray-Casting para verificar si el punto está dentro del polígono del aviso
                                           bool verificarPuntoEnPoligono(LatLng point, List<LatLng> polygon) {
                                             bool inside = false;
                                             int j = polygon.length - 1;
@@ -210,11 +198,8 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                             return inside;
                                           }
 
-                                          // 3. Filtramos si ALGUN aviso del país toca la ciudad que estamos mirando
                                           final bool tieneAvisoLocal = listaAvisos.any((aviso) => verificarPuntoEnPoligono(puntoConsulta, aviso.coordenadas));
                                           final bool tieneAvisosNacionales = listaAvisos.isNotEmpty;
-
-                                          // 📝 Estrategia de texto: Avisa el estado local, o si hay algo en el resto del país
                                           final String textoMarquesina = tieneAvisoLocal
                                               ? '¡CORTO PLAZO EN TU ZONA: ${listaAvisos.firstWhere((a) => verificarPuntoEnPoligono(puntoConsulta, a.coordenadas)).titulo}! '
                                               : tieneAvisosNacionales
@@ -224,14 +209,12 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                           return BotonEmergencia(
                                             texto: "AVISOS",
                                             subtexto: textoMarquesina,
-                                            // 🚨 LA ALARMA SOLO SALTA (NARANJA) SI TE AFECTA A VOS O A TU FAVORITO EN PANTALLA
                                             colorAccento: tieneAvisoLocal
-                                                ? const Color(0xFFE65100) // Naranja Alerta Máxima
-                                                : const Color(0xFF35c795), // color palabra AVISOS
+                                                ? const Color(0xFFE65100)
+                                                : const Color(0xFF35c795),
                                             colorSubtexto: tieneAvisoLocal
                                                 ? Colors.amberAccent
                                                 : Colors.white38,
-                                            // 🔄 El ícono también es inteligente: Rayo si te toca, Check si estás a salvo
                                             icono: tieneAvisoLocal 
                                                 ? Icons.thunderstorm_rounded 
                                                 : Icons.check_circle_outline_rounded,
@@ -245,32 +228,26 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                         },
                                       ),
 
-                                      const SizedBox(height: 14), 
-
-                                      // ⚡ BOTÓN DE ALERTAS DINÁMICO (HÍBRIDO INTELIGENTE)
+                                      const SizedBox(height: 14),
                                       Consumer(
                                         builder: (context, ref, child) {
-                                          // Leemos el nivel de alerta local usando la latitud y longitud de la ciudad actual
                                           final nivelLocalAsync = ref.watch(nivelAlertaLocalProvider(LatLng(climaData.lat, climaData.lon)));
                                           final int nivelAlertaLocal = nivelLocalAsync.value ?? 1;
                                           final bool tieneAlertaLocal = nivelAlertaLocal > 1;
 
                                           return BotonEmergencia(
                                             texto: "ALERTAS",
-                                            // 🇦🇷 El texto sigue avisando a nivel nacional (lo dejamos exactamente igual)
                                             subtexto: tieneAlertasFuturas 
                                                 ? '¡Hay Alerta!' 
                                                 : climaData.subtextoAlertas,
-                                            // 📍 El color ahora es selectivo: naranja solo si la alerta toca tu ciudad
                                             colorAccento: tieneAlertaLocal 
                                                 ? const Color(0xFFE65100) 
-                                                : const Color(0xFF35c795), // Color palabra ALERTA
+                                                : const Color(0xFF35c795),
                                             colorSubtexto: tieneAlertasFuturas 
                                                 ? Colors.amberAccent 
                                                 : climaData.subtextoAlertas.toLowerCase().contains('no hay')
                                                     ? Colors.white38 
                                                     : Colors.amber,
-                                            // 📍 El ícono de peligro también reacciona solo si es local
                                             icono: tieneAlertaLocal 
                                                 ? Icons.warning_amber_rounded 
                                                 : climaData.iconoAlertas,
