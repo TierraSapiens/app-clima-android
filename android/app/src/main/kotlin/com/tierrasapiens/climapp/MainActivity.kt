@@ -1,4 +1,4 @@
-package com.example.app_clima_01
+package com.tierrasapiens.climapp
 
 import io.flutter.embedding.android.FlutterActivity
 

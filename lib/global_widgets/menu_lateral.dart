@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app_clima_01/views/info/pantalla_acerca_de.dart'; 
 import 'package:app_clima_01/views/favoritos/pantalla_favoritos.dart';
+import 'package:app_clima_01/views/configuracion/pantalla_configuracion.dart';
 
 class MenuLateral extends StatelessWidget {
   const MenuLateral({super.key});
@@ -8,7 +9,7 @@ class MenuLateral extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.45,
+      width: MediaQuery.of(context).size.width * 0.50,
       child: Container(
         color: const Color.fromARGB(255, 2, 3, 65),
         child: ListView(
@@ -38,6 +39,18 @@ class MenuLateral extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const PantallaFavoritos()),
+                );
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.settings, color: Colors.white70),
+              title: const Text('Configuración', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú lateral
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PantallaConfiguracion()),
                 );
               },
             ),
