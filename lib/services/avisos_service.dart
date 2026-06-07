@@ -5,13 +5,11 @@ import 'smn_auth_service.dart';
 
 class AvisosService {
   final SmnAuthService _authService = SmnAuthService();
-  
-  // 📍 La URL exacta que descubriste en la pestaña Network
+
   static const String _apiBaseUrl = 'https://ws1.smn.gob.ar/v1/warning/shortterm/';
 
   Future<List<dynamic>> fetchAvisosReales() async {
     try {
-      // 🔑 Reutilizamos tu lógica centralizada de Tokens
       final token = await _authService.obtenerTokenDinamico();
       
       if (token == null) {
@@ -40,12 +38,10 @@ class AvisosService {
 
         final dynamic dataJson = json.decode(response.body);
 
-        // El SMN a veces devuelve un array directo [] si está vacío,
-        // o un mapa GeoJSON {"type": "FeatureCollection", "features": [...]} si hay datos.
         if (dataJson is List) {
-          return dataJson; // Retorna la lista (vacía o con elementos)
+          return dataJson;
         } else if (dataJson is Map && dataJson.containsKey('features')) {
-          return dataJson['features'] as List<dynamic>; // Retorna los polígonos de tormenta
+          return dataJson['features'] as List<dynamic>;
         }
         
         return [];

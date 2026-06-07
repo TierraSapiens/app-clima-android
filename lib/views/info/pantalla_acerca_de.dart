@@ -35,7 +35,7 @@ class PantallaAcercaDe extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // 👈 CORREGIDO: spaceBetween en lugar de between
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Column(

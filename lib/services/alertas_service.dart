@@ -43,7 +43,6 @@ class AlertasService {
       );
 
       if (response.statusCode == 200) {
-        // 🚨 REVISIÓN DE SEGURIDAD 🚨
         debugPrint('====== DIAGNÓSTICO SMN ======');
         debugPrint('1. ¿Llegó respuesta del body?: ${response.body.isNotEmpty}');
         debugPrint('2. Contenido crudo del JSON del SMN:');
@@ -87,9 +86,6 @@ class AlertasService {
       if (alertaSmn != null && alertaSmn['warnings'] != null && (alertaSmn['warnings'] as List).isNotEmpty) {
         nivelAlerta = alertaSmn['warnings'][0]['max_level'] ?? 0;
       }
-
-      // Comentado para no saturar la consola con 168 líneas cada vez:
-      // debugPrint('Zona $idZonaGeoStr -> Nivel=$nivelAlerta');
 
       List<LatLng> puntosDePoligono = [];
       try {
