@@ -2,7 +2,7 @@ import '../../services/push_notification_service.dart';
 import 'package:flutter/material.dart';
 import '../../models/configuracion_model.dart';
 import '../../services/preferencias_service.dart';
-
+// prueba d
 class ConfiguracionController extends ChangeNotifier {
   final PreferenciasService _preferenciasService = PreferenciasService();
 
