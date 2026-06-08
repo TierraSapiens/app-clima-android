@@ -1,5 +1,5 @@
-import '../../services/push_notification_service.dart';
 import 'package:flutter/material.dart';
+import '../../services/push_notification_service.dart';
 import '../../models/configuracion_model.dart';
 import '../../services/preferencias_service.dart';
 
@@ -8,8 +8,10 @@ class ConfiguracionController extends ChangeNotifier {
 
   ConfiguracionModel _configuracion = ConfiguracionModel();
   bool _cargando = true;
+  
   ConfiguracionModel get configuracion => _configuracion;
   bool get cargando => _cargando;
+  
   ConfiguracionController() {
     cargarPreferencias();
   }
@@ -47,14 +49,14 @@ class ConfiguracionController extends ChangeNotifier {
   }
 
   Future<void> actualizarAlertasLocales(bool activas) async {
-  _configuracion = _configuracion.copyWith(alertasLocalesActivas: activas);
-  notifyListeners();
-  await _preferenciasService.guardarConfiguracion(_configuracion);
+    _configuracion = _configuracion.copyWith(alertasLocalesActivas: activas);
+    notifyListeners();
+    await _preferenciasService.guardarConfiguracion(_configuracion);
 
-  if (activas) {
-    await PushNotificationService.activarAlertas();
-  } else {
-    await PushNotificationService.desactivarAlertas();
+    if (activas) {
+      await PushNotificationService.activarAlertas();
+    } else {
+      await PushNotificationService.desactivarAlertas();
+    }
   }
-}
 }

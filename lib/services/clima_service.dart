@@ -3,18 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:app_clima_01/models/clima_model.dart';
+import 'package:app_clima_01/models/configuracion_model.dart'; // ¡Importante!
 import 'package:app_clima_01/utils/conversores_clima.dart';
 
 class ClimaService {
-  Future<ClimaRespuesta?> obtenerDatosClima(double lat, double lon) async {
+  Future<ClimaRespuesta?> obtenerDatosClima(double lat, double lon, ConfiguracionModel config) async {
     final String apiKey = dotenv.env['OPENWEATHER_API_KEY'] ?? '';
+    final String owmUnits = config.unidadTemperatura == 'F' ? 'imperial' : 'metric';
+    final String tempUnit = config.unidadTemperatura == 'F' ? 'fahrenheit' : 'celsius';
+    final String windUnit = config.unidadViento.replaceAll('/', ''); 
+    final String precipUnit = config.unidadPrecipitacion == 'in' ? 'inch' : 'mm';
 
     final urlActual = Uri.parse(
-      'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=metric&lang=es',
+      'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=$owmUnits&lang=es',
     );
 
     final urlForecast = Uri.parse(
-      'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4',
+      'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4'
+      '&temperature_unit=$tempUnit&wind_speed_unit=$windUnit&precipitation_unit=$precipUnit',
     );
 
     try {
@@ -31,10 +37,8 @@ class ClimaService {
         final datosDiarios = datosMeteo['daily'];
 
         final int temperaturaActual = datosActual['main']['temp'].round();
-        final int sensacionTermicaActual = datosActual['main']['feels_like']
-            .round();
-        final String descripcionActual =
-            datosActual['weather'][0]['description'];
+        final int sensacionTermicaActual = datosActual['main']['feels_like'].round();
+        final String descripcionActual = datosActual['weather'][0]['description'];
         final String estadoActual = capitalizarPrimeraLetra(descripcionActual);
         final String codigoIconoActual = datosActual['weather'][0]['icon'];
         final String climaPrincipal = datosActual['weather'][0]['main'];
@@ -57,10 +61,7 @@ class ClimaService {
 
           int codigoWMO = datosDiarios['weather_code'][i];
 
-          if (codigoWMO == 96 ||
-              codigoWMO == 99 ||
-              codigoWMO == 65 ||
-              codigoWMO == 82) {
+          if (codigoWMO == 96 || codigoWMO == 99 || codigoWMO == 65 || codigoWMO == 82) {
             if (nivelMaximoAlerta < 2) nivelMaximoAlerta = 2;
           } else if (codigoWMO == 95 || codigoWMO == 63 || codigoWMO == 81) {
             if (nivelMaximoAlerta < 1) nivelMaximoAlerta = 1;
