@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:app_clima_01/views/clima/pantalla_alertas.dart';
 import 'package:app_clima_01/views/clima/pantalla_avisos.dart';
 import 'package:app_clima_01/views/clima/pantalla_clima_controller.dart';
-import 'package:app_clima_01/views/clima/pantalla_alertas_controller.dart'; 
+import 'package:app_clima_01/views/clima/pantalla_alertas_controller.dart';
 import 'package:app_clima_01/views/clima/widgets/boton_emergencia.dart';
 import 'package:app_clima_01/global_widgets/menu_lateral.dart';
 import 'package:app_clima_01/views/clima/widgets/tarjeta_clima_principal.dart';
@@ -21,7 +21,6 @@ class PantallaClima extends ConsumerStatefulWidget {
 }
 
 class _PantallaClimaState extends ConsumerState<PantallaClima> {
-
   @override
   void initState() {
     super.initState();
@@ -47,20 +46,21 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
   @override
   Widget build(BuildContext context) {
     final climaEstado = ref.watch(climaProvider);
-    final tieneAlertasFuturas = ref.watch(tieneAlertasActivasCualquierDiaProvider).value ?? false;
+    final tieneAlertasFuturas =
+        ref.watch(tieneAlertasActivasCualquierDiaProvider).value ?? false;
 
     return Scaffold(
       drawer: const MenuLateral(),
       body: Builder(
         builder: (context) {
           final climaData = climaEstado.value;
-          final codigoIcono = climaData?.clima.codigoIcono ?? '01d'; 
+          final codigoIcono = climaData?.clima.codigoIcono ?? '01d';
 
           return WeatherBackground(
             codigoIconoApi: codigoIcono,
             child: RefreshIndicator(
-              color: Colors.white, 
-              backgroundColor: const Color(0xFF1E1E1E), 
+              color: Colors.white,
+              backgroundColor: const Color(0xFF1E1E1E),
               onRefresh: () async {
                 await ref.read(climaProvider.notifier).load();
                 ref.invalidate(tieneAlertasActivasCualquierDiaProvider);
@@ -74,7 +74,9 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                   ),
                   child: climaEstado.isLoading
                       ? Padding(
-                          padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.35),
+                          padding: EdgeInsets.only(
+                            top: MediaQuery.of(context).size.height * 0.35,
+                          ),
                           child: const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -92,185 +94,244 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                           ),
                         )
                       : climaEstado.hasError || climaData == null
-                          ? Padding(
-                              padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.35),
-                              child: Column(
-                                children: [
-                                  const Icon(
-                                    Icons.error_outline,
-                                    color: Colors.white,
-                                    size: 48,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    climaEstado.hasError
-                                        ? climaEstado.error.toString()
-                                        : 'No hay datos disponibles',
-                                    style: const TextStyle(color: Colors.white70),
-                                  ),
-                                ],
+                      ? Padding(
+                          padding: EdgeInsets.only(
+                            top: MediaQuery.of(context).size.height * 0.35,
+                          ),
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.error_outline,
+                                color: Colors.white,
+                                size: 48,
                               ),
-                            )
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                              const SizedBox(height: 12),
+                              Text(
+                                climaEstado.hasError
+                                    ? climaEstado.error.toString()
+                                    : 'No hay datos disponibles',
+                                style: const TextStyle(color: Colors.white70),
+                              ),
+                            ],
+                          ),
+                        )
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Stack(
                               children: [
-                                Stack(
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                        top: MediaQuery.of(context).padding.top + 15,
-                                      ),
-                                      child: TarjetaClimaPrincipal(
-                                        localidad: climaData.localidad,
-                                        respuesta: climaData.clima,
-                                        lat: climaData.lat,
-                                        lon: climaData.lon,
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: MediaQuery.of(context).padding.top + 10,
-                                      left: 16,
-                                      child: IconButton(
-                                        icon: const Icon(
-                                          Icons.menu,
-                                          color: Colors.white,
-                                          size: 28,
-                                        ),
-                                        onPressed: () => Scaffold.of(context).openDrawer(),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                
-                                const SizedBox(height: 14), 
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12.0,
-                                    horizontal: 24.0,
+                                  padding: EdgeInsets.only(
+                                    top: //clima principal altura
+                                        MediaQuery.of(context).padding.top + 12,
                                   ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      if (climaData.clima.pronostico.isNotEmpty)
-                                        SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          physics: const BouncingScrollPhysics(),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: climaData.clima.pronostico.map(
-                                              (dia) {
-                                                return Padding(
-                                                  padding: const EdgeInsets.only(right: 12.0),
-                                                  child: TarjetaDia(
-                                                    dia: dia.fechaLabel,
-                                                    imagenAsset: dia.imagenAsset,
-                                                    colorIcono: dia.colorIcono,
-                                                    temp: dia.tempMaxMin,
-                                                    estado: dia.estado,
-                                                    onTap: _abrirGraficoDetallado,
-                                                  ),
-                                                );
-                                              },
-                                            ).toList(),
-                                          ),
-                                        ),
-                                        
-                                      const SizedBox(height: 32), 
-                                      Consumer(
-                                        builder: (context, ref, child) {
-                                          final avisosAsync = ref.watch(avisosControllerProvider);
-                                          final listaAvisos = avisosAsync.value ?? [];
-                                          final LatLng puntoConsulta = LatLng(climaData.lat, climaData.lon);
-                                          bool verificarPuntoEnPoligono(LatLng point, List<LatLng> polygon) {
-                                            bool inside = false;
-                                            int j = polygon.length - 1;
-                                            for (int i = 0; i < polygon.length; i++) {
-                                              if ((polygon[i].longitude < point.longitude && polygon[j].longitude >= point.longitude ||
-                                                   polygon[j].longitude < point.longitude && polygon[i].longitude >= point.longitude) &&
-                                                  (polygon[i].latitude + (point.longitude - polygon[i].longitude) /
-                                                   (polygon[j].longitude - polygon[i].longitude) * (polygon[j].latitude - polygon[i].latitude) < point.latitude)) {
-                                                inside = !inside;
-                                              }
-                                              j = i;
-                                            }
-                                            return inside;
-                                          }
-
-                                          final bool tieneAvisoLocal = listaAvisos.any((aviso) => verificarPuntoEnPoligono(puntoConsulta, aviso.coordenadas));
-                                          final bool tieneAvisosNacionales = listaAvisos.isNotEmpty;
-                                          final String textoMarquesina = tieneAvisoLocal
-                                              ? '¡CORTO PLAZO EN TU ZONA: ${listaAvisos.firstWhere((a) => verificarPuntoEnPoligono(puntoConsulta, a.coordenadas)).titulo}! '
-                                              : tieneAvisosNacionales
-                                                  ? 'No hay avisos en tu zona (Hay alertas en el país)'
-                                                  : 'No hay avisos';
-
-                                          return BotonEmergencia(
-                                            texto: "AVISOS",
-                                            subtexto: textoMarquesina,
-                                            colorAccento: tieneAvisoLocal
-                                                ? const Color(0xFFE65100)
-                                                : const Color(0xFF35c795),
-                                            colorSubtexto: tieneAvisoLocal
-                                                ? Colors.amberAccent
-                                                : Colors.white38,
-                                            icono: tieneAvisoLocal 
-                                                ? Icons.thunderstorm_rounded 
-                                                : Icons.check_circle_outline_rounded,
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(builder: (context) => const PantallaAvisos()),
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-
-                                      const SizedBox(height: 14),
-                                      Consumer(
-                                        builder: (context, ref, child) {
-                                          final nivelLocalAsync = ref.watch(nivelAlertaLocalProvider(LatLng(climaData.lat, climaData.lon)));
-                                          final int nivelAlertaLocal = nivelLocalAsync.value ?? 1;
-                                          final bool tieneAlertaLocal = nivelAlertaLocal > 1;
-
-                                          return BotonEmergencia(
-                                            texto: "ALERTAS",
-                                            subtexto: tieneAlertasFuturas 
-                                                ? '¡Hay Alerta!' 
-                                                : climaData.subtextoAlertas,
-                                            colorAccento: tieneAlertaLocal 
-                                                ? const Color(0xFFE65100) 
-                                                : const Color(0xFF35c795),
-                                            colorSubtexto: tieneAlertasFuturas 
-                                                ? Colors.amberAccent 
-                                                : climaData.subtextoAlertas.toLowerCase().contains('no hay')
-                                                    ? Colors.white38 
-                                                    : Colors.amber,
-                                            icono: tieneAlertaLocal 
-                                                ? Icons.warning_amber_rounded 
-                                                : climaData.iconoAlertas,
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(builder: (context) => const PantallaAlertas()),
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ],
+                                  child: TarjetaClimaPrincipal(
+                                    localidad: climaData.localidad,
+                                    respuesta: climaData.clima,
+                                    lat: climaData.lat,
+                                    lon: climaData.lon,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: MediaQuery.of(context).padding.top + 10,
+                                  left: 16,
+                                  child: IconButton(
+                                    icon: const Icon(
+                                      Icons.menu,
+                                      color: Colors.white,
+                                      size: 28,
+                                    ),
+                                    onPressed: () =>
+                                        Scaffold.of(context).openDrawer(),
                                   ),
                                 ),
                               ],
                             ),
+                            // El Pronostico
+                            const SizedBox(height: 9),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12.0,
+                                horizontal: 24.0,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  if (climaData.clima.pronostico.isNotEmpty)
+                                    SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      physics: const BouncingScrollPhysics(),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: climaData.clima.pronostico
+                                            .map((dia) {
+                                              return Padding(
+                                                padding: const EdgeInsets.only(
+                                                  right: 12.0,
+                                                ),
+                                                child: TarjetaDia(
+                                                  dia: dia.fechaLabel,
+                                                  imagenAsset: dia.imagenAsset,
+                                                  colorIcono: dia.colorIcono,
+                                                  temp: dia.tempMaxMin,
+                                                  estado: dia.estado,
+                                                  onTap: _abrirGraficoDetallado,
+                                                ),
+                                              );
+                                            })
+                                            .toList(),
+                                      ),
+                                    ),
+                                  // Los Alertas y Avisos
+                                  const SizedBox(height: 32),
+                                  Consumer(
+                                    builder: (context, ref, child) {
+                                      final avisosAsync = ref.watch(
+                                        avisosControllerProvider,
+                                      );
+                                      final listaAvisos =
+                                          avisosAsync.value ?? [];
+                                      final LatLng puntoConsulta = LatLng(
+                                        climaData.lat,
+                                        climaData.lon,
+                                      );
+                                      bool verificarPuntoEnPoligono(
+                                        LatLng point,
+                                        List<LatLng> polygon,
+                                      ) {
+                                        bool inside = false;
+                                        int j = polygon.length - 1;
+                                        for (
+                                          int i = 0;
+                                          i < polygon.length;
+                                          i++
+                                        ) {
+                                          if ((polygon[i].longitude <
+                                                          point.longitude &&
+                                                      polygon[j].longitude >=
+                                                          point.longitude ||
+                                                  polygon[j].longitude <
+                                                          point.longitude &&
+                                                      polygon[i].longitude >=
+                                                          point.longitude) &&
+                                              (polygon[i].latitude +
+                                                      (point.longitude -
+                                                              polygon[i]
+                                                                  .longitude) /
+                                                          (polygon[j]
+                                                                  .longitude -
+                                                              polygon[i]
+                                                                  .longitude) *
+                                                          (polygon[j].latitude -
+                                                              polygon[i]
+                                                                  .latitude) <
+                                                  point.latitude)) {
+                                            inside = !inside;
+                                          }
+                                          j = i;
+                                        }
+                                        return inside;
+                                      }
+
+                                      final bool tieneAvisoLocal = listaAvisos
+                                          .any(
+                                            (aviso) => verificarPuntoEnPoligono(
+                                              puntoConsulta,
+                                              aviso.coordenadas,
+                                            ),
+                                          );
+                                      final bool tieneAvisosNacionales =
+                                          listaAvisos.isNotEmpty;
+                                      final String textoMarquesina =
+                                          tieneAvisoLocal
+                                          ? '¡CORTO PLAZO EN TU ZONA: ${listaAvisos.firstWhere((a) => verificarPuntoEnPoligono(puntoConsulta, a.coordenadas)).titulo}! '
+                                          : tieneAvisosNacionales
+                                          ? 'No hay avisos en tu zona (Hay alertas en el país)'
+                                          : 'No hay avisos';
+
+                                      return BotonEmergencia(
+                                        texto: "AVISOS",
+                                        subtexto: textoMarquesina,
+                                        colorAccento: tieneAvisoLocal
+                                            ? const Color(0xFFE65100)
+                                            : const Color(0xFF35c795),
+                                        colorSubtexto: tieneAvisoLocal
+                                            ? Colors.amberAccent
+                                            : Colors.white38,
+                                        icono: tieneAvisoLocal
+                                            ? Icons.thunderstorm_rounded
+                                            : Icons
+                                                  .check_circle_outline_rounded,
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const PantallaAvisos(),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+
+                                  const SizedBox(height: 14),
+                                  Consumer(
+                                    builder: (context, ref, child) {
+                                      final nivelLocalAsync = ref.watch(
+                                        nivelAlertaLocalProvider(
+                                          LatLng(climaData.lat, climaData.lon),
+                                        ),
+                                      );
+                                      final int nivelAlertaLocal =
+                                          nivelLocalAsync.value ?? 1;
+                                      final bool tieneAlertaLocal =
+                                          nivelAlertaLocal > 1;
+
+                                      return BotonEmergencia(
+                                        texto: "ALERTAS",
+                                        subtexto: tieneAlertasFuturas
+                                            ? '¡Hay Alerta!'
+                                            : climaData.subtextoAlertas,
+                                        colorAccento: tieneAlertaLocal
+                                            ? const Color(0xFFE65100)
+                                            : const Color(0xFF35c795),
+                                        colorSubtexto: tieneAlertasFuturas
+                                            ? Colors.amberAccent
+                                            : climaData.subtextoAlertas
+                                                  .toLowerCase()
+                                                  .contains('no hay')
+                                            ? Colors.white38
+                                            : Colors.amber,
+                                        icono: tieneAlertaLocal
+                                            ? Icons.warning_amber_rounded
+                                            : climaData.iconoAlertas,
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const PantallaAlertas(),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
               ),
             ),
-          ); 
-        }, 
-      ), 
-    ); 
-  } 
+          );
+        },
+      ),
+    );
+  }
 }
