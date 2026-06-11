@@ -1,3 +1,4 @@
+import 'package:app_clima_01/views/clima/pantalla_advertencias.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,7 @@ import 'package:app_clima_01/views/clima/widgets/tarjeta_clima_principal.dart';
 import 'package:app_clima_01/views/clima/widgets/tarjeta_dia.dart';
 import 'package:app_clima_01/views/clima/widgets/weather_background.dart';
 import 'package:app_clima_01/views/clima/pantalla_avisos_controller.dart';
+import 'package:app_clima_01/views/clima/advertencias_controller.dart';
 
 class PantallaClima extends ConsumerStatefulWidget {
   const PantallaClima({super.key});
@@ -64,6 +66,9 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
               onRefresh: () async {
                 await ref.read(climaProvider.notifier).load();
                 ref.invalidate(tieneAlertasActivasCualquierDiaProvider);
+                ref.invalidate(
+                  advertenciasProvider,
+                ); // Actualiza también las advertencias al deslizar
               },
               child: SizedBox(
                 width: double.infinity,
@@ -279,6 +284,50 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                   ),
 
                                   const SizedBox(height: 14),
+
+                                  // BOTÓN: ADVERTENCIAS (CON NAVEGACIÓN COMPLETA)
+                                  Consumer(
+                                    builder: (context, ref, child) {
+                                      final advertenciasAsync = ref.watch(
+                                        advertenciasProvider,
+                                      );
+                                      final listaAdvertencias =
+                                          advertenciasAsync.value ?? [];
+                                      final bool hayAdvertencias =
+                                          listaAdvertencias.isNotEmpty;
+
+                                      final String descripcion = hayAdvertencias
+                                          ? '¡Hay ${listaAdvertencias.length} advertencias activas en el país!'
+                                          : 'No se esperan fenómenos de riesgo (Niebla/Humo).';
+
+                                      return BotonEmergencia(
+                                        texto: "ADVERTENCIAS",
+                                        subtexto: descripcion,
+                                        colorAccento: hayAdvertencias
+                                            ? const Color(0xFFE65100)
+                                            : const Color(0xFF35c795),
+                                        colorSubtexto: hayAdvertencias
+                                            ? Colors.amberAccent
+                                            : Colors.white38,
+                                        icono: hayAdvertencias
+                                            ? Icons.info_outline_rounded
+                                            : Icons
+                                                  .check_circle_outline_rounded,
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const PantallaAdvertencias(),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+
+                                  const SizedBox(height: 14),
+
                                   Consumer(
                                     builder: (context, ref, child) {
                                       final nivelLocalAsync = ref.watch(

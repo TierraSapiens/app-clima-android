@@ -11,7 +11,6 @@ class MenuLateral extends StatelessWidget {
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.50,
       child: Material(
-        // <--- AHORA ES UN MATERIAL
         color: const Color.fromARGB(255, 2, 3, 65),
         child: ListView(
           padding: EdgeInsets.zero,
