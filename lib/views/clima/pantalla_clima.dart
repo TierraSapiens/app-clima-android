@@ -190,7 +190,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                             .toList(),
                                       ),
                                     ),
-                                  // Los Alertas y Avisos
+                                  // AVISOS
                                   const SizedBox(height: 32),
                                   Consumer(
                                     builder: (context, ref, child) {
@@ -203,6 +203,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                         climaData.lat,
                                         climaData.lon,
                                       );
+
                                       bool verificarPuntoEnPoligono(
                                         LatLng point,
                                         List<LatLng> polygon,
@@ -255,14 +256,14 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                           ? '¡CORTO PLAZO EN TU ZONA: ${listaAvisos.firstWhere((a) => verificarPuntoEnPoligono(puntoConsulta, a.coordenadas)).titulo}! '
                                           : tieneAvisosNacionales
                                           ? 'No hay avisos en tu zona (Hay alertas en el país)'
-                                          : 'No hay avisos';
+                                          : 'Sin Avisos';
 
                                       return BotonEmergencia(
                                         texto: "AVISOS",
                                         subtexto: textoMarquesina,
                                         colorAccento: tieneAvisoLocal
                                             ? const Color(0xFFE65100)
-                                            : const Color(0xFF35c795),
+                                            : Colors.white54,
                                         colorSubtexto: tieneAvisoLocal
                                             ? Colors.amberAccent
                                             : Colors.white38,
@@ -285,7 +286,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
 
                                   const SizedBox(height: 14),
 
-                                  // BOTÓN: ADVERTENCIAS (CON NAVEGACIÓN COMPLETA)
+                                  // ADVERTENCIAS
                                   Consumer(
                                     builder: (context, ref, child) {
                                       final advertenciasAsync = ref.watch(
@@ -298,14 +299,14 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
 
                                       final String descripcion = hayAdvertencias
                                           ? '¡Hay ${listaAdvertencias.length} advertencias activas en el país!'
-                                          : 'No se esperan fenómenos de riesgo (Niebla/Humo).';
+                                          : 'Sin Advertencias';
 
                                       return BotonEmergencia(
                                         texto: "ADVERTENCIAS",
                                         subtexto: descripcion,
                                         colorAccento: hayAdvertencias
                                             ? const Color(0xFFE65100)
-                                            : const Color(0xFF35c795),
+                                            : Colors.white54,
                                         colorSubtexto: hayAdvertencias
                                             ? Colors.amberAccent
                                             : Colors.white38,
@@ -328,6 +329,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
 
                                   const SizedBox(height: 14),
 
+                                  // ALERTAS
                                   Consumer(
                                     builder: (context, ref, child) {
                                       final nivelLocalAsync = ref.watch(
@@ -347,7 +349,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                             : climaData.subtextoAlertas,
                                         colorAccento: tieneAlertaLocal
                                             ? const Color(0xFFE65100)
-                                            : const Color(0xFF35c795),
+                                            : Colors.white54,
                                         colorSubtexto: tieneAlertasFuturas
                                             ? Colors.amberAccent
                                             : climaData.subtextoAlertas
