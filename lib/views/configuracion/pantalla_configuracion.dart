@@ -136,8 +136,10 @@ class _PantallaConfiguracionState extends State<PantallaConfiguracion> {
                       ),
                       Switch(
                         value: config.alertasLocalesActivas,
-                        activeThumbColor: colorAcento,
-                        activeTrackColor: colorAcento.withValues(alpha: 0.5),
+                        activeThumbColor: Colors.greenAccent, 
+                        activeTrackColor: Colors.greenAccent.withValues(alpha: 0.3), 
+                        inactiveThumbColor: Colors.grey.shade400,
+                        inactiveTrackColor: Colors.white10,
                         onChanged: (activo) => _controller.actualizarAlertasLocales(activo),
                       ),
                     ],

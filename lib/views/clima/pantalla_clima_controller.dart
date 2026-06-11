@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_clima_01/services/clima_service.dart';
 import 'package:app_clima_01/services/ubicacion_service.dart';
 import 'package:app_clima_01/models/clima_model.dart';
+import 'package:app_clima_01/services/preferencias_service.dart'; // AGREGUE ESTE
 
 class ClimaViewData {
   final ClimaRespuesta clima;
@@ -67,7 +68,16 @@ class ClimaController extends AsyncNotifier<ClimaViewData?> {
   }
 
   Future<void> _procesarYEstablecerClima(double lat, double lon, String localidad) async {
-    final climaResp = await _climaService.obtenerDatosClima(lat, lon);
+    
+    // 1. Instanciamos tu servicio de preferencias
+    final preferenciasService = PreferenciasService();
+    
+    // 2. Cargamos la configuración DIRECTAMENTE desde la memoria del teléfono
+    final configuracionActual = await preferenciasService.cargarConfiguracion();
+
+    // 3. Le mandamos esa configuración fresquita al servicio
+    final climaResp = await _climaService.obtenerDatosClima(lat, lon, configuracionActual);
+    
     if (climaResp == null) {
       state = AsyncValue.error(
         Exception('No se pudieron cargar los datos'),
