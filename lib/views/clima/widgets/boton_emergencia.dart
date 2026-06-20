@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:app_clima_01/config/app_theme.dart';
-import 'package:marquee/marquee.dart';
 
 class BotonEmergencia extends StatelessWidget {
   final String texto;
@@ -28,13 +27,13 @@ class BotonEmergencia extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-        color: AppTheme.buttonSurface.withAlpha(128),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: colorAccento,
-          width: 2.0,
+          color: AppTheme.buttonSurface.withAlpha(128),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: colorAccento,
+            width: 2.0,
+          ),
         ),
-      ),
         child: Row(
           children: [
             Icon(icono, color: colorAccento, size: 32),
@@ -46,23 +45,17 @@ class BotonEmergencia extends StatelessWidget {
             ),
             
             const SizedBox(width: 15), 
+            
+            // TEXTO ESTATICO
             Expanded(
-              child: SizedBox(
-                height: 20,
-                child: Marquee(
-                  text: subtexto,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: colorSubtexto,
-                  ),
-                  scrollAxis: Axis.horizontal,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  blankSpace: 40.0,
-                  velocity: 25.0,
-                  pauseAfterRound: const Duration(seconds: 2),
-                  accelerationDuration: const Duration(seconds: 1),
-                  accelerationCurve: Curves.linear,
+              child: Text(
+                subtexto,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: colorSubtexto,
                 ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
             
