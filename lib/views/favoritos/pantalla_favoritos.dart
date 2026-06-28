@@ -134,9 +134,17 @@ class _PantallaFavoritosState extends ConsumerState<PantallaFavoritos> {
           leading: const Icon(Icons.location_city, color: Colors.white70),
           title: Text(ciudadResult.nombre, style: const TextStyle(color: Colors.white)),
           subtitle: Text('Lat: ${ciudadResult.lat} | Lon: ${ciudadResult.lon}', style: const TextStyle(color: Colors.white38)),
-          onTap: () {
-            ref.read(climaProvider.notifier).cargarClima(ciudadResult.lat, ciudadResult.lon, ciudadResult.nombre);
-            Navigator.pop(context);
+          onTap: () async {
+            // 1. Llamamos a la nueva función que acabamos de crear en el controlador
+            await ref.read(climaProvider.notifier).cargarClimaParaCoordenadas(
+              ciudadResult.lat, 
+              ciudadResult.lon, 
+              ciudadResult.nombre, 
+            );
+            // 2. Volvemos a la pantalla principal
+            if (context.mounted) {
+              Navigator.pop(context);
+            }
           },
           trailing: Consumer(
             builder: (context, ref, child) {
@@ -203,9 +211,17 @@ class _PantallaFavoritosState extends ConsumerState<PantallaFavoritos> {
                     ref.read(favoritosProvider.notifier).alternarFavorito(ciudad.nombre, ciudad.lat, ciudad.lon);
                   },
                 ),
-                onTap: () {
-                  ref.read(climaProvider.notifier).cargarClima(ciudad.lat, ciudad.lon, ciudad.nombre);
-                  Navigator.pop(context);
+                onTap: () async {
+                  // Aquí usamos 'ciudad' porque así se llama la variable en esta lista
+                  await ref.read(climaProvider.notifier).cargarClimaParaCoordenadas(
+                    ciudad.lat, 
+                    ciudad.lon, 
+                    ciudad.nombre, 
+                  );
+                  
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
                 },
               ),
             );

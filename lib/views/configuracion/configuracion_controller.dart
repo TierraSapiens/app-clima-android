@@ -1,57 +1,55 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/push_notification_service.dart';
 import '../../models/configuracion_model.dart';
 import '../../services/preferencias_service.dart';
 
-class ConfiguracionController extends ChangeNotifier {
+// 1. Usamos NotifierProvider en lugar de StateNotifierProvider
+final configuracionProvider = NotifierProvider<ConfiguracionController, ConfiguracionModel>(() {
+  return ConfiguracionController();
+});
+
+// 2. Ahora heredamos simplemente de Notifier
+class ConfiguracionController extends Notifier<ConfiguracionModel> {
   final PreferenciasService _preferenciasService = PreferenciasService();
 
-  ConfiguracionModel _configuracion = ConfiguracionModel();
-  bool _cargando = true;
-  
-  ConfiguracionModel get configuracion => _configuracion;
-  bool get cargando => _cargando;
-  
-  ConfiguracionController() {
+  // 3. En el Riverpod moderno, el estado inicial se define obligatoriamente en este método build()
+  @override
+  ConfiguracionModel build() {
+    // Lanzamos la carga de preferencias en segundo plano
     cargarPreferencias();
+    
+    // Retornamos un modelo por defecto inmediatamente para que la pantalla no se quede vacía
+    return ConfiguracionModel();
   }
 
   Future<void> cargarPreferencias() async {
-    _cargando = true;
-    notifyListeners();
-    _configuracion = await _preferenciasService.cargarConfiguracion();
-    _cargando = false;
-    notifyListeners();
+    final configGuardada = await _preferenciasService.cargarConfiguracion();
+    state = configGuardada; // ¡Magia! Al pisar 'state', la pantalla se actualiza sola
   }
 
   Future<void> actualizarTemperatura(String nuevaUnidad) async {
-    _configuracion = _configuracion.copyWith(unidadTemperatura: nuevaUnidad);
-    notifyListeners();
-    await _preferenciasService.guardarConfiguracion(_configuracion);
+    state = state.copyWith(unidadTemperatura: nuevaUnidad);
+    await _preferenciasService.guardarConfiguracion(state);
   }
 
   Future<void> actualizarViento(String nuevaUnidad) async {
-    _configuracion = _configuracion.copyWith(unidadViento: nuevaUnidad);
-    notifyListeners();
-    await _preferenciasService.guardarConfiguracion(_configuracion);
+    state = state.copyWith(unidadViento: nuevaUnidad);
+    await _preferenciasService.guardarConfiguracion(state);
   }
 
   Future<void> actualizarPrecipitacion(String nuevaUnidad) async {
-    _configuracion = _configuracion.copyWith(unidadPrecipitacion: nuevaUnidad);
-    notifyListeners();
-    await _preferenciasService.guardarConfiguracion(_configuracion);
+    state = state.copyWith(unidadPrecipitacion: nuevaUnidad);
+    await _preferenciasService.guardarConfiguracion(state);
   }
 
   Future<void> actualizarPresion(String nuevaUnidad) async {
-    _configuracion = _configuracion.copyWith(unidadPresion: nuevaUnidad);
-    notifyListeners();
-    await _preferenciasService.guardarConfiguracion(_configuracion);
+    state = state.copyWith(unidadPresion: nuevaUnidad);
+    await _preferenciasService.guardarConfiguracion(state);
   }
 
   Future<void> actualizarAlertasLocales(bool activas) async {
-    _configuracion = _configuracion.copyWith(alertasLocalesActivas: activas);
-    notifyListeners();
-    await _preferenciasService.guardarConfiguracion(_configuracion);
+    state = state.copyWith(alertasLocalesActivas: activas);
+    await _preferenciasService.guardarConfiguracion(state);
 
     if (activas) {
       await PushNotificationService.activarAlertas();

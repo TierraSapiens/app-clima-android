@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_clima_01/services/clima_service.dart';
 import 'package:app_clima_01/services/ubicacion_service.dart';
 import 'package:app_clima_01/models/clima_model.dart';
-import 'package:app_clima_01/services/preferencias_service.dart'; // AGREGUE ESTE
+import 'package:app_clima_01/services/preferencias_service.dart';
 
 class ClimaViewData {
   final ClimaRespuesta clima;
@@ -41,49 +41,36 @@ class ClimaController extends AsyncNotifier<ClimaViewData?> {
 
   @override
   Future<ClimaViewData?> build() async {
-    return null;
-  }
-
-  Future<void> load() async {
-    state = const AsyncValue.loading();
-    try {
-      final ubicacion = await _ubicacionService.obtenerUbicacionActual();
-      final double lat = ubicacion.latitud;
-      final double lon = ubicacion.longitud;
-      final String localidad = ubicacion.localidad;
-
-      await _procesarYEstablecerClima(lat, lon, localidad);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> cargarClima(double lat, double lon, String localidad) async {
-    state = const AsyncValue.loading();
-    try {
-      await _procesarYEstablecerClima(lat, lon, localidad);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> _procesarYEstablecerClima(double lat, double lon, String localidad) async {
+    // Esto se ejecuta automáticamente al iniciar la app
+    final ubicacion = await _ubicacionService.obtenerUbicacionActual();
     
-    // 1. Instanciamos tu servicio de preferencias
+    return await _procesarYEstablecerClima(
+      ubicacion.latitud, 
+      ubicacion.longitud, 
+      ubicacion.localidad
+    );
+  }
+
+  /// NUEVO MÉTODO PÚBLICO: Se llamará desde la pantalla de favoritos.
+  /// Cambia el estado del provider a "cargando" y procesa las nuevas coordenadas.
+  Future<void> cargarClimaParaCoordenadas(double lat, double lon, String nombreLocalidad) async {
+    state = const AsyncLoading(); // Muestra el indicador de carga en la UI
+    state = await AsyncValue.guard(() async {
+      // Llama a la función de abajo de forma segura
+      return await _procesarYEstablecerClima(lat, lon, nombreLocalidad);
+    });
+  }
+
+  /// MÉTODO PRIVADO: Hace el trabajo pesado de llamar a las APIs y armar el objeto visual.
+  /// Se mantiene limpio y solo retorna datos, sin modificar el 'state' directamente.
+  Future<ClimaViewData?> _procesarYEstablecerClima(double lat, double lon, String localidad) async {
     final preferenciasService = PreferenciasService();
-    
-    // 2. Cargamos la configuración DIRECTAMENTE desde la memoria del teléfono
     final configuracionActual = await preferenciasService.cargarConfiguracion();
 
-    // 3. Le mandamos esa configuración fresquita al servicio
     final climaResp = await _climaService.obtenerDatosClima(lat, lon, configuracionActual);
     
     if (climaResp == null) {
-      state = AsyncValue.error(
-        Exception('No se pudieron cargar los datos'),
-        StackTrace.current,
-      );
-      return;
+      throw Exception('No se pudieron cargar los datos');
     }
 
     Color colorAvisosSMN = const Color(0xFF22C55E);
@@ -97,7 +84,6 @@ class ClimaController extends AsyncNotifier<ClimaViewData?> {
       colorAvisosSMN = const Color(0xFFF97316);
       subtextoAvisos = 'Zonas afectadas por lluvias intensas';
       iconoAvisos = Icons.warning_amber_rounded;
-
       colorAlertasSMN = const Color(0xFFEF4444);
       subtextoAlertas = 'Zonas críticas: Tormentas severas';
       iconoAlertas = Icons.gpp_bad_rounded;
@@ -105,13 +91,12 @@ class ClimaController extends AsyncNotifier<ClimaViewData?> {
       colorAvisosSMN = const Color(0xFFF97316);
       subtextoAvisos = 'Zonas afectadas por chaparrones';
       iconoAvisos = Icons.warning_amber_rounded;
-
       colorAlertasSMN = const Color(0xFF22C55E);
       subtextoAlertas = 'No hay Alertas';
       iconoAlertas = Icons.shield_outlined;
     }
 
-    final view = ClimaViewData(
+    return ClimaViewData(
       clima: climaResp,
       localidad: localidad,
       lat: lat,
@@ -123,7 +108,5 @@ class ClimaController extends AsyncNotifier<ClimaViewData?> {
       iconoAvisos: iconoAvisos,
       iconoAlertas: iconoAlertas,
     );
-
-    state = AsyncValue.data(view);
   }
 }

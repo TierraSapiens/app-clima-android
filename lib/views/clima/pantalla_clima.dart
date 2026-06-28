@@ -23,13 +23,6 @@ class PantallaClima extends ConsumerStatefulWidget {
 }
 
 class _PantallaClimaState extends ConsumerState<PantallaClima> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(climaProvider.notifier).load();
-    });
-  }
 
   Future<void> _abrirGraficoDetallado() async {
     final estado = ref.read(climaProvider);
@@ -64,11 +57,10 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
               color: Colors.white,
               backgroundColor: const Color(0xFF1E1E1E),
               onRefresh: () async {
-                await ref.read(climaProvider.notifier).load();
+                ref.invalidate(climaProvider);
                 ref.invalidate(tieneAlertasActivasCualquierDiaProvider);
-                ref.invalidate(
-                  advertenciasProvider,
-                ); // Actualiza también las advertencias al deslizar
+                ref.invalidate(advertenciasProvider,
+                );
               },
               child: SizedBox(
                 width: double.infinity,
