@@ -180,99 +180,47 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                             .toList(),
                                       ),
                                     ),
-                                  // AVISOS
-                                  const SizedBox(height: 32),
-                                  Consumer(
-                                    builder: (context, ref, child) {
-                                      final avisosAsync = ref.watch(
-                                        avisosControllerProvider,
-                                      );
-                                      final listaAvisos =
-                                          avisosAsync.value ?? [];
-                                      final LatLng puntoConsulta = LatLng(
-                                        climaData.lat,
-                                        climaData.lon,
-                                      );
+                                    // AVISOS
+                                    const SizedBox(height: 32),
+                                    Consumer(
+                                      builder: (context, ref, child) {
+                                        // 1. Redondeamos las coordenadas a 2 decimales para matar el bucle infinito
+                                        final latRedondeada = double.parse(climaData.lat.toStringAsFixed(2));
+                                        final lonRedondeada = double.parse(climaData.lon.toStringAsFixed(2));
+                                        final ubicacion = LatLng(latRedondeada, lonRedondeada);
 
-                                      bool verificarPuntoEnPoligono(
-                                        LatLng point,
-                                        List<LatLng> polygon,
-                                      ) {
-                                        bool inside = false;
-                                        int j = polygon.length - 1;
-                                        for (
-                                          int i = 0;
-                                          i < polygon.length;
-                                          i++
-                                        ) {
-                                          if ((polygon[i].longitude <
-                                                          point.longitude &&
-                                                      polygon[j].longitude >=
-                                                          point.longitude ||
-                                                  polygon[j].longitude <
-                                                          point.longitude &&
-                                                      polygon[i].longitude >=
-                                                          point.longitude) &&
-                                              (polygon[i].latitude +
-                                                      (point.longitude -
-                                                              polygon[i]
-                                                                  .longitude) /
-                                                          (polygon[j]
-                                                                  .longitude -
-                                                              polygon[i]
-                                                                  .longitude) *
-                                                          (polygon[j].latitude -
-                                                              polygon[i]
-                                                                  .latitude) <
-                                                  point.latitude)) {
-                                            inside = !inside;
-                                          }
-                                          j = i;
-                                        }
-                                        return inside;
-                                      }
+                                        // 2. Escuchamos al nuevo provider que ya procesó todo el polígono
+                                        final estadoAvisos = ref.watch(estadoAvisosProvider(ubicacion));
 
-                                      final bool tieneAvisoLocal = listaAvisos
-                                          .any(
-                                            (aviso) => verificarPuntoEnPoligono(
-                                              puntoConsulta,
-                                              aviso.coordenadas,
-                                            ),
-                                          );
-                                      final bool tieneAvisosNacionales =
-                                          listaAvisos.isNotEmpty;
-                                      final String textoMarquesina =
-                                          tieneAvisoLocal
-                                          ? '¡CORTO PLAZO EN TU ZONA: ${listaAvisos.firstWhere((a) => verificarPuntoEnPoligono(puntoConsulta, a.coordenadas)).titulo}! '
-                                          : tieneAvisosNacionales
-                                          ? 'No hay avisos en tu zona (Hay alertas en el país)'
-                                          : 'Sin Avisos';
+                                        // 3. Extraemos los valores
+                                        final bool tieneAvisoLocal = estadoAvisos['tieneAvisoLocal'];
+                                        final bool tieneAvisosNacionales = estadoAvisos['tieneAvisosNacionales'];
+                                        final String tituloAviso = estadoAvisos['tituloAviso'];
 
-                                      return BotonEmergencia(
-                                        texto: "AVISOS",
-                                        subtexto: textoMarquesina,
-                                        colorAccento: tieneAvisoLocal
-                                            ? const Color(0xFFE65100)
-                                            : Colors.white54,
-                                        colorSubtexto: tieneAvisoLocal
-                                            ? Colors.amberAccent
-                                            : Colors.white38,
-                                        icono: tieneAvisoLocal
-                                            ? Icons.thunderstorm_rounded
-                                            : Icons
-                                                  .check_circle_outline_rounded,
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const PantallaAvisos(),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
+                                        // 4. Armamos el texto
+                                        final String textoMarquesina = tieneAvisoLocal
+                                            ? '¡CORTO PLAZO EN TU ZONA: $tituloAviso!'
+                                            : tieneAvisosNacionales
+                                                ? 'No hay avisos en tu zona (Hay alertas en el país)'
+                                                : 'Sin Avisos';
+
+                                        return BotonEmergencia(
+                                          texto: "AVISOS",
+                                          subtexto: textoMarquesina,
+                                          colorAccento: tieneAvisoLocal ? const Color(0xFFE65100) : Colors.white54,
+                                          colorSubtexto: tieneAvisoLocal ? Colors.amberAccent : Colors.white38,
+                                          icono: tieneAvisoLocal ? Icons.thunderstorm_rounded : Icons.check_circle_outline_rounded,
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => const PantallaAvisos(),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
 
                                   const SizedBox(height: 14),
 
