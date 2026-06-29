@@ -23,7 +23,6 @@ class PantallaClima extends ConsumerStatefulWidget {
 }
 
 class _PantallaClimaState extends ConsumerState<PantallaClima> {
-
   Future<void> _abrirGraficoDetallado() async {
     final estado = ref.read(climaProvider);
     final data = estado.value;
@@ -59,8 +58,7 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
               onRefresh: () async {
                 ref.invalidate(climaProvider);
                 ref.invalidate(tieneAlertasActivasCualquierDiaProvider);
-                ref.invalidate(advertenciasProvider,
-                );
+                ref.invalidate(advertenciasProvider);
               },
               child: SizedBox(
                 width: double.infinity,
@@ -324,11 +322,20 @@ class _PantallaClimaState extends ConsumerState<PantallaClima> {
                                   // ALERTAS
                                   Consumer(
                                     builder: (context, ref, child) {
+                                      // REDONDEO CLAVE: Mata el bucle infinito limitando los decimales
+                                      final latRedondeada = double.parse(
+                                        climaData.lat.toStringAsFixed(2),
+                                      );
+                                      final lonRedondeada = double.parse(
+                                        climaData.lon.toStringAsFixed(2),
+                                      );
+
                                       final nivelLocalAsync = ref.watch(
                                         nivelAlertaLocalProvider(
-                                          LatLng(climaData.lat, climaData.lon),
+                                          LatLng(latRedondeada, lonRedondeada),
                                         ),
                                       );
+
                                       final int nivelAlertaLocal =
                                           nivelLocalAsync.value ?? 1;
                                       final bool tieneAlertaLocal =
